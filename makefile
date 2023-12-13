@@ -1,27 +1,30 @@
-all: server client
+all: server client clean
+
 server: server.o dispatcher.o utility.o auth.o gioco.o
 	gcc -Wall server.o dispatcher.o utility.o auth.o -o server 
 
 client: client.o utility.o 
 	gcc -Wall client.o -o client
 
-client.o: client.c
-	gcc -Wall -g -c client.c
+client.o: Client/main.c
+	gcc -Wall -g -c -std=c89 Client/main.c -o client.o
+
+server.o: Server/main.c
+	gcc -Wall -g -c -std=c89 Server/main.c -o server.o
 
 utility.o: utility.c utility.h 
-	gcc -Wall -g -c utility.c -o utility.o
+	gcc -Wall -g -c -std=c89 utility.c -o utility.o
 
-server.o: server.c utility.o
-	gcc -Wall -g -c server.c -o server.o
+dispatcher.o: Server/dispatcher.c Server/dispatcher.h
+	gcc -Wall -g -c -std=c89 Server/dispatcher.c -o dispatcher.o
 
-dispatcher.o: dispatcher.c dispatcher.h
-	gcc -Wall -g -c dispatcher.c -o dispatcher.o
+gioco.o: Server/gioco.c Server/gioco.h
+	gcc -Wall -g -c -std=c89 Server/gioco.c -o gioco.o
 
-gioco.o: gioco.c gioco.h
-	gcc -Wall -g -c gioco.c -o gioco.o
+auth.o: Server/auth.c Server/auth.h
+	gcc -Wall -g -c -std=c89 Server/auth.c -o auth.o
 
-auth.o: auth.c auth.h
-	gcc -Wall -g -c auth.c -o auth.o
+.PHONY: clean
 
 clean: 
-	rm *.o server client
+	rm *.o

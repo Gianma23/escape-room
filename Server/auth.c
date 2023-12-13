@@ -3,7 +3,7 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include "auth.h"
-#include "utility.h"
+#include "../utility.h"
 
 char* register_user(char *opt)
 {

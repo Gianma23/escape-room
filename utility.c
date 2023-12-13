@@ -13,14 +13,14 @@ bool invia_messaggio(int p_socket, char* p_messaggio, char* p_errore){
     uint16_t lmsg = htons(len);
     int ret;
 
-    // Invio al partner la dimensione del messaggio
+    /* Invio al partner la dimensione del messaggio */
     ret = send(p_socket, &lmsg, sizeof(uint16_t), 0);
     if(ret < 0){
         perror(strcat(p_errore, " (lunghezza)\n"));
         return false;
     }
 
-    //Invio al partner il messaggio
+    /* Invio al partner il messaggio */
     ret = send(p_socket, p_messaggio, len, 0);
     if(ret < 0){
         perror(strcat(p_errore, "\n"));
@@ -40,10 +40,10 @@ bool ricevi_messaggio(int p_socket, char* p_messaggio, char* p_errore){
         return false;
     }
 				
-    // Conversione in formato 'host'
+    /* Conversione in formato 'host' */
     len = ntohs(lmsg);
 
-    // Ricezione del messaggio
+    /* Ricezione del messaggio */
     ret = recv(p_socket, p_messaggio, len, 0);
 
     if(ret < 0){

@@ -1,5 +1,5 @@
-#include "gioco.h"
 #include <stdio.h>
+#include "gioco.h"
 
 static const oggetto oggetti_cimitero[] = {
 
@@ -41,7 +41,23 @@ static const locazione locazioni_cimitero[] = {
 
 static const scenario scenario_cimitero = {
     1,
+    "cimitero",
     "blablabla",
     oggetti_cimitero,
     locazioni_cimitero
 };
+
+static const scenario *scenari[] = {
+    &scenario_cimitero
+};
+
+char* prendi_scenari()
+{
+    int i;
+    char *res = "";
+    for(i = 0; i < N_SCENARI; i++) {
+        sprintf(res, "%d:%s", scenari[i]->id, scenari[i]->nome);
+    }
+    printf(res);
+    return res;
+}

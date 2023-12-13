@@ -3,11 +3,8 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include "dispatcher.h"
-#include "utility.h"
 #include "auth.h"
 #include "gioco.h"
-
-#define COMANDO_DIM 64
 
 char* handler_register(int sock, char *opt)
 {
@@ -148,4 +145,7 @@ void command_handler(int socket, char *buffer, char *soggetto)
     printf("comando non trovato.\n");
 }
 
-
+char* comandi_client()
+{
+    
+}

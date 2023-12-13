@@ -8,7 +8,8 @@
 #include <stdlib.h>
 #include <sys/select.h>
 #include "dispatcher.h"
-#include "utility.h"
+#include "gioco.h"
+#include "../utility.h"
 
 #define BUFFER_DIM 1024
 #define QUEUE_DIM 10
@@ -25,7 +26,6 @@ int main(int argc, char *argv[])
     char buffer[BUFFER_DIM] = "";
     int list_sock, comm_sock;
     char input[6];
-    char *comando;
 
     printf("======================================================\n"
            "                    SERVER STARTED                    \n"
@@ -91,10 +91,13 @@ int main(int argc, char *argv[])
                     addrlen = sizeof(cl_addr);
                     comm_sock = accept(list_sock, (struct sockaddr*)&cl_addr, &addrlen);
                     if(comm_sock < 0) {
-                        /* errore */
+                        perror("Errore in fase di accept");
+                        exit(1);
                     }
 
-                    /* invio lista stanze disponibili e comandi disponibili */
+                    /* invio al client degli scenari e comandi disponibili */
+                    sprintf(buffer, "%s %s", prendi_scenari());
+                    invia_messaggio(i, buffer, "errore invio iniziale\n");
 
                     FD_SET(comm_sock, &master);
                     if(comm_sock > fdmax) {
@@ -103,7 +106,7 @@ int main(int argc, char *argv[])
                 }
                 /* socket diverso da quello di ascolto */
                 else {
-                    ricevi_messaggio(i, buffer, "errore ricezione comando");
+                    ricevi_messaggio(i, buffer, "errore ricezione comando\n");
                     printf("comando ricevuto: %s", buffer);
                     command_handler(i, buffer, "client");
                 }
