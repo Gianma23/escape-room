@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include "auth.h"
+#include "utility.h"
 
 char* register_user(char *opt)
 {
@@ -15,11 +16,14 @@ char* register_user(char *opt)
 
     user = strtok(opt, " ");
     if(user == NULL) {
-        return "Errore in fase di registrazione.";
+        return "Errore in fase di registrazione.\n";
     }
     password = strtok(NULL, " ");
     if(password == NULL) {
-        return "Errore in fase di registrazione.";
+        return "Errore in fase di registrazione.\n";
+    }
+    if(strtok(NULL, " ") != NULL) {
+        return "Troppi parametri.\n";
     }
     
     filePtr = fopen("users.txt", "a+");
@@ -31,13 +35,13 @@ char* register_user(char *opt)
     while (getline(&record, &len, filePtr) != -1) {
         sscanf(record, "%s", record_user);
         if(strcmp(record_user, user) == 0) {
-            return "Username già preso! Provane un altro.";
+            return "Username già preso! Provane un altro.\n";
         }
     }
     /* inserisco il nuovo user */
     fprintf(filePtr, "%s %s", user, password);
     fclose(filePtr);
-    return "Registrazione avvenuta con successo!";
+    return "Registrazione avvenuta con successo!\n";
 }
 
 char* login_user(char* opt)
@@ -49,14 +53,18 @@ char* login_user(char* opt)
     char *password = NULL;
     FILE *filePtr = NULL;
     size_t len = 0;
+    bool trovato = false;
 
     user = strtok(opt, " ");
     if(user == NULL) {
-        return "Errore in fase di login.";
+        return "Errore in fase di login.\n";
     }
     password = strtok(NULL, " ");
     if(password == NULL) {
-        return "Errore in fase di login.";
+        return "Errore in fase di login.\n";
+    }
+    if(strtok(NULL, " ") != NULL) {
+        return "Troppi parametri.";
     }
     
     filePtr = fopen("users.txt", "a+");
@@ -70,12 +78,14 @@ char* login_user(char* opt)
         if(strcmp(record_user, user) != 0)
             continue;
 
+        trovato = true;
+        printf("%s %s", record_password, password);
         if(strcmp(record_password, password) != 0) {
-            return "Password errata! Ritenta.";
+            return "Password errata! Ritenta.\n";
         }
         /* Utente e password corretti */
         break;
     }
     fclose(filePtr);
-    return "Login avvenuto con successo!";
+    return "Login avvenuto con successo!\n";
 }

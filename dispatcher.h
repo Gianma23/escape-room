@@ -4,15 +4,13 @@
 #include <netinet/in.h>
 #include "utility.h"
 
+#define N_COMANDI_SERVER 1
+#define N_COMANDI_CLIENT 9
+
 typedef struct comando {
     char *nome;
     char* (*handler)();
 } comando;
-
-typedef struct gruppo {
-    bool attivo;
-    struct sockaddr_in* giocatori[2];
-} gruppo;
 
 void command_handler(int, char *, char *);
 

@@ -29,11 +29,14 @@ int main(int argc, char *argv[])
         exit(1);
     }
     for(;;) {
-        memset(buffer, 0, 50);
+        memset(buffer, 0, sizeof(buffer));
         fgets(buffer, 50, stdin);
+        buffer[strcspn(buffer, "\n")] = 0;
         if(!invia_messaggio(cl_sock, buffer, "Errore in fase di invio riga di comando find.")) 
             exit(1);
 
-        printf("messaggio inviato con successo\n");
+        memset(buffer, 0, sizeof(buffer));
+        ricevi_messaggio(cl_sock, buffer, "Errore in fase di ricezione");
+        printf("%s", buffer);
     } 
 }

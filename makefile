@@ -1,5 +1,5 @@
 all: server client
-server: server.o dispatcher.o utility.o auth.o
+server: server.o dispatcher.o utility.o auth.o gioco.o
 	gcc -Wall server.o dispatcher.o utility.o auth.o -o server 
 
 client: client.o utility.o 
@@ -16,6 +16,9 @@ server.o: server.c utility.o
 
 dispatcher.o: dispatcher.c dispatcher.h
 	gcc -Wall -g -c dispatcher.c -o dispatcher.o
+
+gioco.o: gioco.c gioco.h
+	gcc -Wall -g -c gioco.c -o gioco.o
 
 auth.o: auth.c auth.h
 	gcc -Wall -g -c auth.c -o auth.o
