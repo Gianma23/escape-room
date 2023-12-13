@@ -7,7 +7,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/select.h>
-#include "cmd_handler.h"
+#include "dispatcher.h"
+#include "utility.h"
 
 #define BUFFER_DIM 1024
 #define QUEUE_DIM 10
@@ -19,19 +20,29 @@ int main(int argc, char *argv[])
     fd_set master, read_fds;
     int fdmax;
     int ret, i;
-    int len_msg;
     socklen_t addrlen;
+    in_port_t porta = htons(atoi(argv[1]));
     char buffer[BUFFER_DIM] = "";
     int list_sock, comm_sock;
+    char input[6];
+    char *comando;
 
-    char input[10];
+    printf("======================================================\n"
+           "                    SERVER STARTED                    \n"
+           "======================================================\n"
+           "Comandi disponibili:\n"
+           "    start       avvia il server di gioco\n"
+           "    stop        termina il server\n");
+    
     while(1) {
+        memset(input, 0, sizeof(input));
         fgets(input, 6, stdin);
         if(strcmp(input, "start") == 0) {
             break;
         }
-        if(strcmp(input, "stop") == 0) {
-            return 0;
+        if(strcmp(input, "stop\n\0") == 0) {
+            printf("Arresto del server\n");
+            exit(1);
         }
         printf("Comando non disponibile.\n");
     }
@@ -40,18 +51,21 @@ int main(int argc, char *argv[])
 
     memset(&sv_addr, 0, sizeof(sv_addr));
     sv_addr.sin_family = AF_INET;
-    sv_addr.sin_port = 4242;
+    sv_addr.sin_port = porta;
     sv_addr.sin_addr.s_addr = INADDR_ANY;
 
     ret = bind(list_sock, (struct sockaddr*)&sv_addr, sizeof(sv_addr));
     if(ret < 0) {
-        /* gestisci errore */
+        perror("Errore in fase di bind");
+        exit(1);
     }
 
     ret = listen(list_sock, 10);
     if(ret < 0) {
-        /* gestisci errore */
+        perror("Errore in fase di listen");
+        exit(1);
     }
+    printf("Socket di ascolto creato. fd: %d\n", list_sock);
 
     FD_ZERO(&master);
     FD_ZERO(&read_fds);
@@ -70,7 +84,7 @@ int main(int argc, char *argv[])
                 /* stdin */
                 if(i == 0) {
                     scanf("%s", buffer);
-                    command_handler(buffer, "server");
+                    command_handler(i, buffer, "server");
                 }
                 /* socket di ascolto */
                 else if(i == list_sock) {
@@ -80,6 +94,8 @@ int main(int argc, char *argv[])
                         /* errore */
                     }
 
+                    /* invio lista stanze disponibili e comandi disponibili */
+
                     FD_SET(comm_sock, &master);
                     if(comm_sock > fdmax) {
                         fdmax = comm_sock;
@@ -87,14 +103,9 @@ int main(int argc, char *argv[])
                 }
                 /* socket diverso da quello di ascolto */
                 else {
-                    ret = recv(i, &len_msg, sizeof(uint16_t), 0);
-                    len_msg = ntohs(len_msg);
-                    ret = recv(i, buffer, len_msg, 0);
-                    if(ret < 0) {
-                        /* errore */
-                    }
+                    ricevi_messaggio(i, buffer, "errore ricezione comando");
                     printf("comando ricevuto: %s", buffer);
-                    command_handler(buffer, "client");
+                    command_handler(i, buffer, "client");
                 }
             }
         }
