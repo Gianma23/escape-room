@@ -96,8 +96,10 @@ int main(int argc, char *argv[])
                     }
 
                     /* invio al client degli scenari e comandi disponibili */
-                    sprintf(buffer, "%s %s", prendi_scenari());
-                    invia_messaggio(i, buffer, "errore invio iniziale\n");
+                    memset(buffer, 0, sizeof(buffer));
+                    prendi_scenari(buffer);
+                    printf("%s",buffer);
+                    invia_messaggio(comm_sock, buffer, "errore invio iniziale\n");
 
                     FD_SET(comm_sock, &master);
                     if(comm_sock > fdmax) {
@@ -106,8 +108,15 @@ int main(int argc, char *argv[])
                 }
                 /* socket diverso da quello di ascolto */
                 else {
-                    ricevi_messaggio(i, buffer, "errore ricezione comando\n");
-                    printf("comando ricevuto: %s", buffer);
+                    ret = ricevi_messaggio(i, buffer, "errore ricezione comando\n");
+                    printf("comando ricevuto: %s\n", buffer);
+                    if(ret == 0) {
+                        printf("Socket %d chiuso, rimozione dal set.\n", i);
+                        /* TODO: logout */
+                        close(i);
+                        FD_CLR(i, &master);
+                        continue;
+                    }
                     command_handler(i, buffer, "client");
                 }
             }

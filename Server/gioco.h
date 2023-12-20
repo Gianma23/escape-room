@@ -33,9 +33,9 @@ typedef struct scenario {
 
 typedef struct gruppo {
     bool attivo;
-    struct sockaddr_in* giocatori[MAX_GIOCATORI_GRUPPO];
+    struct sockaddr_in *indirizzi[MAX_GIOCATORI_GRUPPO];
 } gruppo;
 
-char* prendi_scenari();
+void prendi_scenari(char*);
 
 #endif

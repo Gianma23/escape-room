@@ -11,6 +11,7 @@
 typedef struct comando {
     char *nome;
     char* (*handler)();
+    char* descrizione;
 } comando;
 
 void command_handler(int, char *, char *);

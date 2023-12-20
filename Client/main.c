@@ -33,6 +33,10 @@ int main(int argc, char *argv[])
         exit(1);
     }
     
+    memset(buffer, 0, sizeof(buffer));
+    ricevi_messaggio(cl_sock, buffer, "errore");
+    printf("%s", buffer);
+
     for(;;) {
         memset(buffer, 0, sizeof(buffer));
         fgets(buffer, COMANDO_DIM, stdin);
