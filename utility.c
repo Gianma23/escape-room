@@ -17,16 +17,16 @@ bool invia_messaggio(int p_socket, char* p_messaggio, char* p_errore){
     ret = send(p_socket, &lmsg, sizeof(uint16_t), 0);
     if(ret < 0){
         perror(strcat(p_errore, " (lunghezza)\n"));
-        return false;
+        return ret;
     }
 
     /* Invio al partner il messaggio */
     ret = send(p_socket, p_messaggio, len, 0);
     if(ret < 0){
         perror(strcat(p_errore, "\n"));
-        return false;
+        return ret;
     }
-    return true;
+    return ret;
 }
 
 bool ricevi_messaggio(int p_socket, char* p_messaggio, char* p_errore){
@@ -37,7 +37,7 @@ bool ricevi_messaggio(int p_socket, char* p_messaggio, char* p_errore){
     ret = recv(p_socket, &lmsg, sizeof(uint16_t), 0);
     if(ret < 0){
         perror(strcat(p_errore, " (lunghezza)\n"));
-        return false;
+        return ret;
     }
 				
     /* Conversione in formato 'host' */
@@ -48,7 +48,25 @@ bool ricevi_messaggio(int p_socket, char* p_messaggio, char* p_errore){
 
     if(ret < 0){
         perror("Errore in fase di ricezione comando da un qualche client: \n");
-        return false;
+        return ret;
     }
-    return true;
+    return ret;
+}
+
+/* debug */
+void print_addr(struct sockaddr_in *addr)
+{
+    char tmp[20];
+    memset(tmp, 0, sizeof(tmp));
+    inet_ntop(AF_INET, &(addr->sin_addr.s_addr), tmp, 20);
+    printf("%s:%d\n", tmp, addr->sin_port);
+}
+
+/* ritorna true se sono uguali e false se sono diversi */
+bool compara_addr(struct sockaddr_in *addr1, struct sockaddr_in *addr2)
+{
+    /* debug */
+/*     print_addr(&addr1);
+    print_addr(&addr2); */
+    return addr1->sin_addr.s_addr == addr2->sin_addr.s_addr && addr1->sin_port == addr2->sin_port;
 }

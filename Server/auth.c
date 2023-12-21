@@ -1,16 +1,19 @@
+#define  _GNU_SOURCE
 #include <string.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdlib.h>
-#include "auth.h"
-#include "../utility.h"
-#include "gioco.h"
 #include <arpa/inet.h>
+#include "auth.h"
+#include "gioco.h"
 
-static struct sockaddr_in indirizzi_login[MAX_GIOCATORI_GRUPPO] = {0, 0};
+static authentication loggati[MAX_GIOCATORI_GRUPPO];
 static int num_login = 0;
 
-/* DESCRIZIONE */
+/* ================== IMPLEMENTAZIONE HEADER ================== */
+
+/*  opt: opzioni del comando nel formato <username> <password>
+    Registra l'utente con la password nel file users.txt */
 char* register_user(char *opt)
 {
     char *record = NULL;
@@ -50,8 +53,10 @@ char* register_user(char *opt)
     return "Registrazione avvenuta con successo!\n";
 }
 
-/* DESCRIZIONE */
-char* login_user(char* opt, struct sockaddr_in client_sock)
+/*  opt: opzioni del comando nel formato <username> <password>
+    Effettua il login dell'utente, controllando che non sia 
+    già loggato */
+char* login_user(char* opt, struct sockaddr_in cl_addr)
 {
     char *record = NULL;
     char record_user[USER_DIM];
@@ -61,49 +66,93 @@ char* login_user(char* opt, struct sockaddr_in client_sock)
     FILE *filePtr = NULL;
     size_t len = 0;
     bool trovato = false;
-    
-    if(num_login == MAX_GIOCATORI_GRUPPO) {
-        return "Raggiunto il massimo numero di persone loggate insieme.\n";
-    }
-    /* TODO: struttura che salva lo username insieme all'ip, cosicchè non ci si possa loggare con lo stesso
-        account da due client diversi */
-    if(num_login == 1) {
-        if(client_sock.sin_addr.s_addr == indirizzi_login[0].sin_addr.s_addr && client_sock.sin_port == indirizzi_login[0].sin_port)
-            return "Sei già loggato!\n";
-    }
 
+    /* parsing delle opzioni */
     user = strtok(opt, " ");
     if(user == NULL) {
-        return "Errore in fase di login.\n";
+        return "Parametri non sufficienti.\n";
     }
     password = strtok(NULL, " ");
     if(password == NULL) {
-        return "Errore in fase di login.\n";
+        return "Parametri non sufficienti.\n";
     }
     if(strtok(NULL, " ") != NULL) {
-        return "Troppi parametri.";
+        return "Troppi parametri.\n";
     }
-    
+        
+    /* controlli */
+    if(num_login == MAX_GIOCATORI_GRUPPO) {
+        return "Raggiunto il massimo numero di persone loggate insieme.\n";
+    }
+    if(num_login == 1 && compara_addr(&cl_addr, &loggati[0].addr)) {
+        return "Sei già loggato!\n";
+    }
+    if(num_login == 1 && strcmp(*(loggati[0].username), user) == 0) {
+        return "Questo username è già loggato su un altro dispositivo.\n";
+    }
+
+    /* cerco l'utente nel file users.txt */
     filePtr = fopen("users.txt", "a+");
     if(filePtr == NULL) {
         printf("Errore di apertura file user.txt!\n");
         exit(1);
     }
-    /* cerco lo username */
     while (getline(&record, &len, filePtr) != -1) {
         sscanf(record, "%s %s", record_user, record_password);
         if(strcmp(record_user, user) != 0)
             continue;
 
         trovato = true;
-        printf("%s %s", record_password, password);
         if(strcmp(record_password, password) != 0) {
+            fclose(filePtr);
             return "Password errata! Ritenta.\n";
         }
-        /* Utente e password corretti */
+        /* username e password corretti */
+        fclose(filePtr);
         break;
     }
-    fclose(filePtr);
-    indirizzi_login[num_login++] = client_sock;
+    if(!trovato) {
+        return "Username non registrato.\n";
+    }
+    loggati[num_login++].addr = cl_addr;
     return "Login avvenuto con successo!\n";
+}
+
+/*  cl_sock: socket del client 
+    Effettua il logout dello user associato a cl_sock */
+char* logout_user(int cl_sock)
+{
+    int i;
+    struct sockaddr_in cl_addr;
+    socklen_t len = sizeof(cl_addr);
+    memset(&cl_addr, 0, len);
+    
+    getpeername(cl_sock, (struct sockaddr*)&cl_addr, &len);
+    for(i = 0; i < num_login; i++) {
+        if(compara_addr(&cl_addr, &loggati[i].addr)) {
+            memset(&loggati[i], 0, sizeof(authentication));
+            num_login--;
+            break;
+        }
+    }
+    return "Logout effettuato.\n";
+}
+
+/*  cl_sock: socket del client 
+    La funzione controlla se lo user associato a cl_sock sia loggato */
+bool is_logged(int cl_sock)
+{
+    int i;
+    struct sockaddr_in cl_addr;
+    socklen_t len = sizeof(cl_addr);
+    memset(&cl_addr, 0, len);
+    /* TODO: se si disconnette il primo e ci sono 2 giocatori si disconnette anche il secondo
+             se si disconnette solo il secondo il gioco può continuare */
+    getpeername(cl_sock, (struct sockaddr*)&cl_addr, &len);
+    for(i = 0; i < num_login; i++) {
+        if(compara_addr(&cl_addr, &loggati[i].addr)) {
+            return true;
+        }
+    }
+    return false;
 }

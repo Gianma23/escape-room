@@ -9,6 +9,7 @@
 #define MAX_GIOCATORI_GRUPPO 2
 #define N_SCENARI 1
 
+
 typedef struct oggetto {
     char *nome;
     char *descrizione;
@@ -33,7 +34,8 @@ typedef struct scenario {
 
 typedef struct gruppo {
     bool attivo;
-    struct sockaddr_in *indirizzi[MAX_GIOCATORI_GRUPPO];
+    int num_giocatori;
+    struct sockaddr_in indirizzi[MAX_GIOCATORI_GRUPPO];
 } gruppo;
 
 void prendi_scenari(char*);

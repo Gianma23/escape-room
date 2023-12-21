@@ -36,6 +36,9 @@ int main(int argc, char *argv[])
     memset(buffer, 0, sizeof(buffer));
     ricevi_messaggio(cl_sock, buffer, "errore");
     printf("%s", buffer);
+    memset(buffer, 0, sizeof(buffer));
+    ricevi_messaggio(cl_sock, buffer, "errore");
+    printf("%s", buffer);
 
     for(;;) {
         memset(buffer, 0, sizeof(buffer));

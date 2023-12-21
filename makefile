@@ -1,7 +1,7 @@
 all: server client clean
 
-server: server.o dispatcher.o utility.o auth.o gioco.o
-	gcc -Wall server.o dispatcher.o utility.o auth.o -o server 
+server: server.o utility.o dispatcher.o auth.o gioco.o
+	gcc -Wall server.o utility.o dispatcher.o auth.o gioco.o -o server 
 
 client: client.o utility.o 
 	gcc -Wall client.o -o client

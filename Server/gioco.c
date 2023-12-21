@@ -3,11 +3,11 @@
 #include "gioco.h"
 
 static const oggetto oggetti_cimitero[] = {
-
+    
 };
 
 static const oggetto oggetti_cimitero_cancello[] = {
-    /* lucchetto */
+    {"lucchetto", "Sembra che serva una chiave per aprirlo...", true, false}
 };
 
 static const oggetto oggetti_cimitero_albero[] = {
@@ -22,6 +22,15 @@ static const oggetto oggetti_cimitero_tomba[] = {
 
 };
 
+static const oggetto oggetti_cimitero_chiesa[] = {
+    {"libro", "", true, true},
+    {"boh",}
+};
+
+static const locazione locazioni_cimitero_chiesa[] = {
+    
+};
+
 static const locazione locazioni_cimitero[] = {
     {"cancello",
      "cancellino carino",
@@ -33,7 +42,8 @@ static const locazione locazioni_cimitero[] = {
      locazioni_cimitero_albero},
     {"chiesa",
      "chiesa sesso",
-     NULL},
+     oggetti_cimitero_chiesa,
+     locazioni_cimitero_chiesa},
     {"tomba",
      "buh",
      oggetti_cimitero_tomba,
@@ -52,6 +62,8 @@ static const scenario *scenari[] = {
     &scenario_cimitero
 };
 
+/*  buf: buffer nel quale scrivere.
+    Ritorna gli scenari disponibili */
 void prendi_scenari(char *buf)
 {
     int i;

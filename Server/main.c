@@ -9,6 +9,7 @@
 #include <sys/select.h>
 #include "dispatcher.h"
 #include "gioco.h"
+#include "auth.h"
 #include "../utility.h"
 
 #define BUFFER_DIM 1024
@@ -47,6 +48,7 @@ int main(int argc, char *argv[])
         printf("Comando non disponibile.\n");
     }
 
+    printf("Avvio del server in corso...\n");
     list_sock = socket(AF_INET, SOCK_STREAM, 0);
 
     memset(&sv_addr, 0, sizeof(sv_addr));
@@ -75,7 +77,7 @@ int main(int argc, char *argv[])
     fdmax = list_sock;
 
     for(;;) {
-        memset(buffer, 0, 1024);
+        memset(buffer, 0, sizeof(buffer));
         read_fds = master;
         select(fdmax + 1, &read_fds, NULL, NULL, NULL);
 
@@ -84,22 +86,26 @@ int main(int argc, char *argv[])
                 /* stdin */
                 if(i == 0) {
                     scanf("%s", buffer);
-                    command_handler(i, buffer, "server");
+                    command_dispatcher(i, buffer, "server");
                 }
                 /* socket di ascolto */
                 else if(i == list_sock) {
                     addrlen = sizeof(cl_addr);
+                    memset(&cl_addr, 0, sizeof(cl_addr));
                     comm_sock = accept(list_sock, (struct sockaddr*)&cl_addr, &addrlen);
                     if(comm_sock < 0) {
                         perror("Errore in fase di accept");
                         exit(1);
                     }
+                    printf("Nuovo client connesso, socket di comunicazione: %d\n", comm_sock);
 
                     /* invio al client degli scenari e comandi disponibili */
                     memset(buffer, 0, sizeof(buffer));
                     prendi_scenari(buffer);
-                    printf("%s",buffer);
-                    invia_messaggio(comm_sock, buffer, "errore invio iniziale\n");
+                    invia_messaggio(comm_sock, buffer, "Errore invio scenari\n");
+                    comandi_client(buffer);
+                    invia_messaggio(comm_sock, buffer, "Errore invio scenari\n");
+                    printf("Scenari e comandi disponibili inviati.\n\n");
 
                     FD_SET(comm_sock, &master);
                     if(comm_sock > fdmax) {
@@ -108,18 +114,23 @@ int main(int argc, char *argv[])
                 }
                 /* socket diverso da quello di ascolto */
                 else {
-                    ret = ricevi_messaggio(i, buffer, "errore ricezione comando\n");
-                    printf("comando ricevuto: %s\n", buffer);
+                    ret = ricevi_messaggio(i, buffer, "Errore ricezione comando dal client\n");
                     if(ret == 0) {
-                        printf("Socket %d chiuso, rimozione dal set.\n", i);
-                        /* TODO: logout */
+                        printf("Client disconnesso...\n");
+                        printf("%s", logout_user(i));
+                        /* TODO: vedere se vanno eliminate altre cose */
                         close(i);
+                        printf("Socket %d chiuso.\n", i);
                         FD_CLR(i, &master);
+                        printf("Socket rimosso dal set dei descrittori.\n\n");
                         continue;
                     }
-                    command_handler(i, buffer, "client");
+                    
+                    printf("comando ricevuto: '%s' dal socket %d\n", buffer, i);
+                    command_dispatcher(i, buffer, "client");
+                    printf("\n");
                 }
             }
-        }
-    }
+        } /* fine for */
+    } /* fine for(;;) */
 }

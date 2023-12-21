@@ -14,7 +14,7 @@ typedef struct comando {
     char* descrizione;
 } comando;
 
-void command_handler(int, char *, char *);
-char* comandi_client();
+void command_dispatcher(int, char *, char *);
+void comandi_client(char *);
 
 #endif
