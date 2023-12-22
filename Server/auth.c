@@ -72,6 +72,7 @@ char* login_user(char* opt, struct sockaddr_in cl_addr)
     if(user == NULL) {
         return "Parametri non sufficienti.\n";
     }
+    
     password = strtok(NULL, " ");
     if(password == NULL) {
         return "Parametri non sufficienti.\n";

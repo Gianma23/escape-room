@@ -3,12 +3,10 @@
 
 #include "../utility.h"
 
-#define MAX_OGGETTI_LOCAZIONE 10
-#define MAX_OGGETTI_SCENARIO 20
-#define MAX_LOCAZIONI_SCENARIO 5
+#define OGGETTI_CIMITERO 3
+#define LOCAZIONI_CIMITERO 6
 #define MAX_GIOCATORI_GRUPPO 2
 #define N_SCENARI 1
-
 
 typedef struct oggetto {
     char *nome;
@@ -20,17 +18,18 @@ typedef struct oggetto {
 typedef struct locazione {
     char *nome;
     char *descrizione;
-    const oggetto *oggetti;
-    const struct locazione *sottolocazioni;
 } locazione;
 
 typedef struct scenario {
-    int id;
     char *nome;
     char *descrizione;
     const oggetto *oggetti;
     const locazione *locazioni;
 } scenario;
+
+typedef struct utilizzo {
+    
+} utilizzo;
 
 typedef struct gruppo {
     bool attivo;
@@ -38,6 +37,9 @@ typedef struct gruppo {
     struct sockaddr_in indirizzi[MAX_GIOCATORI_GRUPPO];
 } gruppo;
 
-void prendi_scenari(char*);
+void prendi_scenari(char *);
+char* prendi_descrizione(char *);
+char* inizia_scenario(int);
+bool is_game_started();
 
 #endif
