@@ -9,10 +9,10 @@
 #define N_SCENARI 1
 
 typedef struct oggetto {
-    char *nome;
+    const char *nome;
     char *descrizione;
     bool is_bloccato;
-    bool has_enigma;
+    bool is_preso;
 } oggetto;
 
 typedef struct locazione {
@@ -23,8 +23,8 @@ typedef struct locazione {
 typedef struct scenario {
     char *nome;
     char *descrizione;
-    const oggetto *oggetti;
-    const locazione *locazioni;
+    oggetto *oggetti;
+    locazione *locazioni;
 } scenario;
 
 typedef struct utilizzo {
@@ -39,6 +39,7 @@ typedef struct gruppo {
 
 void prendi_scenari(char *);
 char* prendi_descrizione(char *);
+char* prendi_oggetto(char *);
 char* inizia_scenario(int);
 bool is_game_started();
 

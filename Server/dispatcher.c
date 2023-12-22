@@ -8,6 +8,8 @@
 
 static gruppo gruppo_giocatori = {};
 
+/* HANDLERS ===================== */
+
 char* handler_register(int sock, char *opt)
 {
     return register_user(opt);
@@ -95,11 +97,10 @@ char* handler_look(int sock, char* opt)
     if(opzione != NULL && strtok(NULL, " ") != NULL) {
         return "Troppi parametri.\n";
     }
-    printf("ciao\n");
     return prendi_descrizione(opzione);
 }
 
-char* handler_use(int sock, char* opt)
+char* handler_take(int sock, char* opt)
 {
     if(!is_logged(sock)) {
         return "Non sei loggato!\n";
@@ -107,10 +108,18 @@ char* handler_use(int sock, char* opt)
     if(!is_game_started()) {
         return "Nessuno scenario iniziato. Fare prima start <stanza>\n";
     }
-    return NULL;
+
+    char* oggetto = strtok(opt, " ");
+    if(oggetto == NULL) {
+        return "Specificare l'oggetto da prendere.\n";
+    }
+    if(strtok(NULL, " ") != NULL) {
+        return "Troppi parametri.\n";
+    }
+    return prendi_oggetto(oggetto);
 }
 
-char* handler_take(int sock, char* opt)
+char* handler_use(int sock, char* opt)
 {
     if(!is_logged(sock)) {
         return "Non sei loggato!\n";
@@ -135,14 +144,14 @@ return NULL;
 }
 
 static const comando lista_comandi_client[] = {
-    {"register", handler_register, "<username> <password>\tregistra un nuovo account"},
-    {"login", handler_login, "<username> <password>\taccedi con un account"},
-    {"startgroup", handler_startgroup, "\tinizializza un gruppo di gioco"},
-    {"joingroup", handler_joingroup, "\tentra in un gruppo se è stato creato"},
-    {"start", handler_start, "<stanza>\tinizia uno scenario"},
+    {"register", handler_register, " <username> <password>\tregistra un nuovo account"},
+    {"login", handler_login, " <username> <password>\taccedi con un account"},
+    {"startgroup", handler_startgroup, "\t\tinizializza un gruppo di gioco"},
+    {"joingroup", handler_joingroup, "\t\tentra in un gruppo se è stato creato"},
+    {"start", handler_start, " <stanza>\tinizia uno scenario"},
     {"look", handler_look,"bohhh"},
-    {"use", handler_use, "<username> <password>\tregistra un nuovo account"},
     {"take", handler_take, "<username> <password>\tregistra un nuovo account"},
+    {"use", handler_use, "<username> <password>\tregistra un nuovo account"},
     {"end", handler_end, "<username> <password>\tregistra un nuovo account"}
 };
 

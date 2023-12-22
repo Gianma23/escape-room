@@ -6,9 +6,9 @@ static int scenario_scelto = -1;
 
 /* SCENARI ============================ */
 
-static const oggetto oggetti_cimitero[] = {
+static oggetto oggetti_cimitero[] = {
     {"lucchetto", "Sembra che serva una chiave per aprirlo...\n", true, false},
-    {"libro", "tapa tapa ", true, true},
+    {"libro", "tapa tapa ", true, false},
     {"boh", "hi hi", false, false}
 };
 
@@ -16,7 +16,7 @@ static const utilizzo tabella_utilizzi_cimitero[] = {
 
 };
 
-static const locazione locazioni_cimitero[] = {
+static locazione locazioni_cimitero[] = {
     {"cancello",
      "cancellino carino\n"},
     {"albero",
@@ -31,18 +31,18 @@ static const locazione locazioni_cimitero[] = {
      "buh"}
 };
 
-static const scenario scenario_cimitero = {
+static scenario scenario_cimitero = {
     "cimitero",
     "blablabla\n",
     oggetti_cimitero,
     locazioni_cimitero
 };
 
-static const scenario *scenari[] = {
+static scenario *scenari[] = {
     &scenario_cimitero
 };
 
-/* IMPLEMENTAZIONE FUNZIONI HEADER */
+/* IMPLEMENTAZIONE FUNZIONI HEADER ============= */
 
 /*  buf: buffer nel quale scrivere.
     Ritorna gli scenari disponibili */
@@ -76,6 +76,27 @@ char* prendi_descrizione(char *opzione)
         }
     }
     return "Oggetto/Locazione non trovata.\n";
+}
+
+char* prendi_oggetto(char *oggetto)
+{
+    int i;
+    scenario *scen = scenari[scenario_scelto];
+    for(i = 0; i < OGGETTI_CIMITERO; i++) {
+        if(strcmp(oggetto, scen->oggetti[i].nome) != 0) {
+            continue;
+        }
+        if(scen->oggetti[i].is_bloccato) {
+            return "Oggetto bloccato!\n";
+        }
+        if(scen->oggetti[i].is_preso) {
+            return "Oggetto già preso!\n";
+        }
+        /* TODO: se c'è enigma attivarlo */
+        scen->oggetti[i].is_preso = true;
+        return "Oggetto raccolto!\n";
+    }
+    return "Oggetto non trovato.\n";
 }
 
 char* inizia_scenario(int id_scenario)

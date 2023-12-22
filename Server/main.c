@@ -100,6 +100,7 @@ int main(int argc, char *argv[])
                     printf("Nuovo client connesso, socket di comunicazione: %d\n", comm_sock);
 
                     /* invio al client degli scenari e comandi disponibili */
+                    /* TODO: mettere in una sola send */
                     memset(buffer, 0, sizeof(buffer));
                     prendi_scenari(buffer);
                     invia_messaggio(comm_sock, buffer, "Errore invio scenari\n");
