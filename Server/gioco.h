@@ -3,26 +3,31 @@
 
 #include "../utility.h"
 
-#define OGGETTI_CIMITERO 3
-#define LOCAZIONI_CIMITERO 6
+#define MAX_OGGETTI_LOCAZIONE 5
 #define MAX_GIOCATORI_GRUPPO 2
 #define N_SCENARI 1
 
 typedef struct oggetto {
     const char *nome;
-    char *descrizione;
+    char *descrizione_bloccato;
+    char *descrizione_sbloccato;
+    char *descrizione_locazione;
     bool is_bloccato;
     bool is_preso;
 } oggetto;
 
 typedef struct locazione {
-    char *nome;
-    char *descrizione;
+    const char *nome;
+    char *descrizione_iniziale;
+    char *n_oggetti;
+    char *oggetti[MAX_OGGETTI_LOCAZIONE];
 } locazione;
 
 typedef struct scenario {
-    char *nome;
-    char *descrizione;
+    const char *nome;
+    const char *descrizione;
+    const int n_oggetti;
+    const int n_locazioni;
     oggetto *oggetti;
     locazione *locazioni;
 } scenario;

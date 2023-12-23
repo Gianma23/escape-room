@@ -7,7 +7,11 @@ static int scenario_scelto = -1;
 /* SCENARI ============================ */
 
 static oggetto oggetti_cimitero[] = {
-    {"lucchetto", "Sembra che serva una chiave per aprirlo...\n", true, false},
+    {"lucchetto", 
+     "Sembra che serva una chiave per aprirlo...\n",
+     "Il lucchetto è sbloccato adesso.\n",
+     "\n",
+     true, false},
     {"libro", "tapa tapa ", true, false},
     {"boh", "hi hi", false, false}
 };
@@ -18,7 +22,8 @@ static const utilizzo tabella_utilizzi_cimitero[] = {
 
 static locazione locazioni_cimitero[] = {
     {"cancello",
-     "cancellino carino\n"},
+     "cancellino carino\n",
+     {&oggetti_cimitero[0], &oggetti_cimitero[1]}},
     {"albero",
      "albero waw\n"},
     {"buco",
@@ -34,6 +39,7 @@ static locazione locazioni_cimitero[] = {
 static scenario scenario_cimitero = {
     "cimitero",
     "blablabla\n",
+    3, 6,
     oggetti_cimitero,
     locazioni_cimitero
 };
@@ -41,6 +47,14 @@ static scenario scenario_cimitero = {
 static scenario *scenari[] = {
     &scenario_cimitero
 };
+
+/* FUNZIONI DI UTILITÀ ==================== */
+
+char* descrizione_locazione(locazione *loc)
+{
+/* TODO: concatenare la descrizione base con le descrizioni degli oggetti 
+    non presi ancora. */
+}
 
 /* IMPLEMENTAZIONE FUNZIONI HEADER ============= */
 
@@ -65,14 +79,15 @@ char* prendi_descrizione(char *opzione)
         return scen->descrizione;
     }
     
-    for(i = 0; i < OGGETTI_CIMITERO; i++) {
-        if(strcmp(opzione, scen->oggetti[i].nome) == 0) {
-            return scen->oggetti[i].descrizione;
+    for(i = 0; i < scen->n_oggetti; i++) {
+        oggetto *obj = &scen->oggetti[i]; 
+        if(strcmp(opzione, obj->nome) == 0) {
+            return obj->is_bloccato ? obj->descrizione_bloccato : obj->descrizione_sbloccato;
         }
     }
-    for(i = 0; i < LOCAZIONI_CIMITERO; i++) {
+    for(i = 0; i < scen->n_locazioni; i++) {
         if(strcmp(opzione, scen->locazioni[i].nome) == 0) {
-            return scen->locazioni[i].descrizione;
+            return descrizione_locazione(&scen->locazioni[i]);
         }
     }
     return "Oggetto/Locazione non trovata.\n";
@@ -82,7 +97,7 @@ char* prendi_oggetto(char *oggetto)
 {
     int i;
     scenario *scen = scenari[scenario_scelto];
-    for(i = 0; i < OGGETTI_CIMITERO; i++) {
+    for(i = 0; i < scen->n_oggetti; i++) {
         if(strcmp(oggetto, scen->oggetti[i].nome) != 0) {
             continue;
         }
