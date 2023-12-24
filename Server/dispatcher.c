@@ -6,71 +6,63 @@
 #include "auth.h"
 #include "gioco.h"
 
-static gruppo gruppo_giocatori = {};
+static gruppo giocatori = {};
 
-/* HANDLERS ===================== */
+/* ===================== HANDLERS ===================== */
+/*  cl_addr: indirizzo del client che ha invocato il comando
+    opt: opzioni del comando */
 
-char* handler_register(int sock, char *opt)
+char* handler_register(struct sockaddr_in cl_addr, char *opt)
 {
     return register_user(opt);
 }
 
-char* handler_login(int sock, char* opt)
+char* handler_login(struct sockaddr_in cl_addr, char* opt)
 {
-    struct sockaddr_in cl_addr;
-    socklen_t len = sizeof(cl_addr);
-    memset(&cl_addr, 0, sizeof(cl_addr));
-    getpeername(sock, (struct sockaddr*)&cl_addr, &len);
     return login_user(opt, cl_addr);
 }
 
-char* handler_startgroup(int sock, char* opt)
+char* handler_startgroup(struct sockaddr_in cl_addr, char* opt)
 {
-    socklen_t len = sizeof(struct sockaddr_in);
-    if(!is_logged(sock)) {
+    if(!is_logged(cl_addr)) {
         return "Non sei loggato!\n";
     }
     if(is_game_started()) {
         return "Impossibile creare il gruppo, è già in corso uno scenario.\n";
     }
-    if(gruppo_giocatori.attivo) {
+    if(giocatori.attivo) {
         return "Gruppo per giocare già creato.";
     }
 
-    gruppo_giocatori.attivo = true;
-    gruppo_giocatori.num_giocatori++;
-    getpeername(sock, (struct sockaddr*)&gruppo_giocatori.indirizzi[0], &len);
+    giocatori.attivo = true;
+    giocatori.num_giocatori++;
+    giocatori.indirizzi[0] = cl_addr;
     return "Gruppo per la stanza creato con successo!\n";
 }
 
-char* handler_joingroup(int sock, char* opt)
+char* handler_joingroup(struct sockaddr_in cl_addr, char* opt)
 {
-    socklen_t len = sizeof(struct sockaddr_in);
-    struct sockaddr_in cl_addr;
-    memset(&cl_addr, 0, len);
-
-    if(!is_logged(sock)) {
+    if(!is_logged(cl_addr)) {
         return "Non sei loggato!\n";
     }
-    if(!gruppo_giocatori.attivo) {
+    if(!giocatori.attivo) {
         return "Gruppo non esistente, impossibile entrare.\n";
     }
-    if(gruppo_giocatori.num_giocatori == MAX_GIOCATORI_GRUPPO) {
+    if(giocatori.num_giocatori == MAX_GIOCATORI_GRUPPO) {
         return "Gruppo già pieno!\n";
     }
-    getpeername(sock, (struct sockaddr*)&cl_addr, &len);
-    if(compara_addr(&gruppo_giocatori.indirizzi[0], &cl_addr)) {
+    if(compara_addr(&giocatori.indirizzi[0], &cl_addr)) {
         return "Sei già nel gruppo!\n";
     }
 
-    gruppo_giocatori.num_giocatori++;
-    gruppo_giocatori.indirizzi[gruppo_giocatori.num_giocatori++] = cl_addr;
+    giocatori.num_giocatori++;
+    giocatori.indirizzi[giocatori.num_giocatori++] = cl_addr;
     return "Ingresso nel gruppo! In attesa che il creatore inizi lo scenario.\n";
 }
 
-char* handler_start(int sock, char* opt)
+char* handler_start(struct sockaddr_in cl_addr, char* opt)
 {
-    if(!is_logged(sock)) {
+    if(!is_logged(cl_addr)) {
         return "Non sei loggato!\n";
     }
     if(is_game_started()) {
@@ -84,9 +76,9 @@ char* handler_start(int sock, char* opt)
     return inizia_scenario(id_scenario);
 }
 
-char* handler_look(int sock, char* opt) 
+char* handler_look(struct sockaddr_in cl_addr, char* opt) 
 {
-    if(!is_logged(sock)) {
+    if(!is_logged(cl_addr)) {
         return "Non sei loggato!\n";
     }
     if(!is_game_started()) {
@@ -100,9 +92,9 @@ char* handler_look(int sock, char* opt)
     return prendi_descrizione(opzione);
 }
 
-char* handler_take(int sock, char* opt)
+char* handler_take(struct sockaddr_in cl_addr, char* opt)
 {
-    if(!is_logged(sock)) {
+    if(!is_logged(cl_addr)) {
         return "Non sei loggato!\n";
     }
     if(!is_game_started()) {
@@ -116,12 +108,12 @@ char* handler_take(int sock, char* opt)
     if(strtok(NULL, " ") != NULL) {
         return "Troppi parametri.\n";
     }
-    return prendi_oggetto(oggetto);
+    return prendi_oggetto(cl_addr, oggetto);
 }
 
-char* handler_use(int sock, char* opt)
+char* handler_use(struct sockaddr_in cl_addr, char* opt)
 {
-    if(!is_logged(sock)) {
+    if(!is_logged(cl_addr)) {
         return "Non sei loggato!\n";
     }
     if(!is_game_started()) {
@@ -130,18 +122,20 @@ char* handler_use(int sock, char* opt)
     return NULL;
 }
 
-char* handler_end(int sock, char *opt)
+char* handler_end(struct sockaddr_in cl_addr, char *opt)
 {
-    if(!is_logged(sock)) {
+    if(!is_logged(cl_addr)) {
         return "Non sei loggato!\n";
     }
     return NULL;
 }
 
-char* handler_stop(int sock, char* opt)
+char* handler_stop(struct sockaddr_in cl_addr, char* opt)
 {
 return NULL;
 }
+
+/* COMANDI =============== */
 
 static const comando lista_comandi_client[] = {
     {"register", handler_register, " <username> <password>\tregistra un nuovo account"},
@@ -159,6 +153,8 @@ static const comando lista_comandi_server[] = {
     {"stop", handler_stop}
 };
 
+/* IMPLEMENTAZIONE FUNZIONI INTERFACCIA ============ */
+
 /*  socket: client al quale mandare la risposta
     buffer: stringa contente il comando
     soggetto: chi ha invocato il comando, client o server
@@ -174,20 +170,29 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
     const comando *lista_comandi = strcmp(soggetto, "server") == 0 ? lista_comandi_server : lista_comandi_client;
     const int N_COMANDI = strcmp(soggetto, "server") == 0 ? N_COMANDI_SERVER : N_COMANDI_CLIENT;
     
+    /* cerco il comando nella lista dei comandi */
     com = strtok(buffer, " ");
     for(i = 0; i < N_COMANDI; i++) {
         if(strcmp(com, lista_comandi[i].nome) == 0) {
             printf("comando trovato.\n");
             opt = strtok(NULL, "\0");
+            /* caso in cui non ci sono opzioni */
             if(opt == NULL) {
                 opt = buffer;
                 *opt = '\0';
             }
-            char* risposta = lista_comandi[i].handler(socket, opt);
+            /* prendo indirizzo del client */
+            struct sockaddr_in cl_addr;
+            socklen_t len = sizeof(cl_addr);
+            memset(&cl_addr, 0, sizeof(cl_addr));
+            getpeername(socket, (struct sockaddr*)&cl_addr, &len);
+            /* chiamo l'handler del comando */
+            char* risposta = lista_comandi[i].handler(cl_addr, opt);
             invia_messaggio(socket, risposta, "Errore invio risposta al comando");
             return;
         }
     }   
+    /* TODO: riconoscimento comando simile */
     printf("comando non trovato.\n");
 }
 

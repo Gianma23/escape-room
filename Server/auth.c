@@ -121,14 +121,9 @@ char* login_user(char* opt, struct sockaddr_in cl_addr)
 
 /*  cl_sock: socket del client 
     Effettua il logout dello user associato a cl_sock */
-char* logout_user(int cl_sock)
+char* logout_user(struct sockaddr_in cl_addr)
 {
     int i;
-    struct sockaddr_in cl_addr;
-    socklen_t len = sizeof(cl_addr);
-    memset(&cl_addr, 0, len);
-    
-    getpeername(cl_sock, (struct sockaddr*)&cl_addr, &len);
     for(i = 0; i < num_login; i++) {
         if(compara_addr(&cl_addr, &loggati[i].addr)) {
             memset(&loggati[i], 0, sizeof(authentication));
@@ -141,15 +136,10 @@ char* logout_user(int cl_sock)
 
 /*  cl_sock: socket del client 
     La funzione controlla se lo user associato a cl_sock sia loggato */
-bool is_logged(int cl_sock)
+bool is_logged(struct sockaddr_in cl_addr)
 {
     int i;
-    struct sockaddr_in cl_addr;
-    socklen_t len = sizeof(cl_addr);
-    memset(&cl_addr, 0, len);
-    /* TODO: se si disconnette il primo e ci sono 2 giocatori si disconnette anche il secondo
-             se si disconnette solo il secondo il gioco può continuare */
-    getpeername(cl_sock, (struct sockaddr*)&cl_addr, &len);
+    /* TODO: se si disconnette un giocatore il gioco finisce */
     for(i = 0; i < num_login; i++) {
         if(compara_addr(&cl_addr, &loggati[i].addr)) {
             return true;

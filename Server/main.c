@@ -118,8 +118,8 @@ int main(int argc, char *argv[])
                     ret = ricevi_messaggio(i, buffer, "Errore ricezione comando dal client\n");
                     if(ret == 0) {
                         printf("Client disconnesso...\n");
-                        printf("%s", logout_user(i));
-                        /* TODO: vedere se vanno eliminate altre cose */
+                        /* printf("%s", logout_user(i)); */
+                        /* TODO: funzione reset scenario, gruppo e logout di tutti */
                         close(i);
                         printf("Socket %d chiuso.\n", i);
                         FD_CLR(i, &master);

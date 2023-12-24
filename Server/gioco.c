@@ -12,33 +12,44 @@ static oggetto oggetti_cimitero[] = {
      "Il lucchetto è sbloccato adesso.\n",
      "\n",
      true, false},
-    {"libro", "tapa tapa ", true, false},
-    {"boh", "hi hi", false, false}
+    {"libro",
+     "tapa tapa ", 
+     "\n",
+     "\n",
+     true, false},
+    {"boh", "hi hi",
+     "\n",
+     "\n",
+     false, false}
 };
 
 static const utilizzo tabella_utilizzi_cimitero[] = {
-
+    {"chiave", "lucchetto"}
 };
 
 static locazione locazioni_cimitero[] = {
     {"cancello",
      "cancellino carino\n",
+     2,
      {&oggetti_cimitero[0], &oggetti_cimitero[1]}},
     {"albero",
-     "albero waw\n"},
+     "albero waw\n",
+     1},
     {"buco",
-     "stocazzo\n"},
+     "stocazzo\n",1},
     {"chiesa",
-     "chiesa sesso"},
+     "chiesa sesso",1},
     {"altare",
-     "basdad"},
+     "basdad",1},
     {"tomba",
-     "buh"}
+     "buh",1}
 };
 
 static scenario scenario_cimitero = {
     "cimitero",
-    "blablabla\n",
+    "Ti trovi in un cimitero, l'unica uscita è un ++cancello++. Alla\n"
+    "sua sinistra vedi un ++albero++ secco, lì accanto è presente una\n"
+    "++tomba++. Dietro di te c'è una ++chiesa++.\n",
     3, 6,
     oggetti_cimitero,
     locazioni_cimitero
@@ -54,6 +65,7 @@ char* descrizione_locazione(locazione *loc)
 {
 /* TODO: concatenare la descrizione base con le descrizioni degli oggetti 
     non presi ancora. */
+    return NULL;
 }
 
 /* IMPLEMENTAZIONE FUNZIONI HEADER ============= */
@@ -93,12 +105,12 @@ char* prendi_descrizione(char *opzione)
     return "Oggetto/Locazione non trovata.\n";
 }
 
-char* prendi_oggetto(char *oggetto)
+char* prendi_oggetto(struct sockaddr_in addr,char *obj)
 {
     int i;
     scenario *scen = scenari[scenario_scelto];
     for(i = 0; i < scen->n_oggetti; i++) {
-        if(strcmp(oggetto, scen->oggetti[i].nome) != 0) {
+        if(strcmp(obj, scen->oggetti[i].nome) != 0) {
             continue;
         }
         if(scen->oggetti[i].is_bloccato) {
@@ -109,6 +121,7 @@ char* prendi_oggetto(char *oggetto)
         }
         /* TODO: se c'è enigma attivarlo */
         scen->oggetti[i].is_preso = true;
+        scen->oggetti[i].addr_possessore = addr;
         return "Oggetto raccolto!\n";
     }
     return "Oggetto non trovato.\n";

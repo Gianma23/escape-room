@@ -8,32 +8,36 @@
 #define N_SCENARI 1
 
 typedef struct oggetto {
-    const char *nome;
+    char *nome;
     char *descrizione_bloccato;
     char *descrizione_sbloccato;
     char *descrizione_locazione;
     bool is_bloccato;
     bool is_preso;
+    struct sockaddr_in addr_possessore;
+    /* TODO: salvare IP di chi prende l'oggetto per verificare se può usarlo con la use
+        (non ci sarebbe questo problema senza multiplayer) */
 } oggetto;
 
 typedef struct locazione {
-    const char *nome;
+    char *nome;
     char *descrizione_iniziale;
-    char *n_oggetti;
-    char *oggetti[MAX_OGGETTI_LOCAZIONE];
+    int n_oggetti;
+    oggetto *oggetti[MAX_OGGETTI_LOCAZIONE];
 } locazione;
 
 typedef struct scenario {
-    const char *nome;
-    const char *descrizione;
-    const int n_oggetti;
-    const int n_locazioni;
+    char *nome;
+    char *descrizione;
+    int n_oggetti;
+    int n_locazioni;
     oggetto *oggetti;
     locazione *locazioni;
 } scenario;
 
 typedef struct utilizzo {
-    
+    char *primo;
+    char *secondo;
 } utilizzo;
 
 typedef struct gruppo {
@@ -44,7 +48,7 @@ typedef struct gruppo {
 
 void prendi_scenari(char *);
 char* prendi_descrizione(char *);
-char* prendi_oggetto(char *);
+char* prendi_oggetto(struct sockaddr_in, char *);
 char* inizia_scenario(int);
 bool is_game_started();
 

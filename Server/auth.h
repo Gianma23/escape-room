@@ -14,7 +14,7 @@ typedef struct authentication {
 
 char* register_user(char*);
 char* login_user(char*, struct sockaddr_in);
-char* logout_user(int);
-bool is_logged(int);
+char* logout_user(struct sockaddr_in);
+bool is_logged(struct sockaddr_in);
 
 #endif
