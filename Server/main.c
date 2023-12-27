@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
                 /* socket diverso da quello di ascolto */
                 else {
                     ret = ricevi_messaggio(i, buffer, "Errore ricezione comando dal client\n");
-                    if(ret == 0) {
+                    if(ret == STDIN_FILENO) {
                         printf("Client disconnesso...\n");
                         /* printf("%s", logout_user(i)); */
                         /* TODO: funzione reset scenario, gruppo e logout di tutti */

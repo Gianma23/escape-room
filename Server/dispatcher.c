@@ -119,7 +119,16 @@ char* handler_use(struct sockaddr_in cl_addr, char* opt)
     if(!is_game_started()) {
         return "Nessuno scenario iniziato. Fare prima start <stanza>\n";
     }
-    return NULL;
+    
+    char* obj1 = strtok(opt, " ");
+    if(obj1 == NULL) {
+        return "Specificare almeno un oggetto da usare.\n";
+    }
+    char* obj2 = strtok(NULL, " ");
+    if(strtok(NULL, " ") != NULL) {
+        return "Troppi parametri.\n";
+    }
+    return utilizza_oggetti(cl_addr, obj1, obj2);
 }
 
 char* handler_end(struct sockaddr_in cl_addr, char *opt)

@@ -20,6 +20,10 @@ static oggetto oggetti_cimitero[] = {
     {"boh", "hi hi",
      "\n",
      "\n",
+     false, false},
+    {"boh", "hi hi",
+     "\n",
+     "\n",
      false, false}
 };
 
@@ -29,12 +33,12 @@ static const utilizzo tabella_utilizzi_cimitero[] = {
 
 static locazione locazioni_cimitero[] = {
     {"cancello",
-     "cancellino carino\n",
-     2,
-     {&oggetti_cimitero[0], &oggetti_cimitero[1]}},
+     "Provi ad aprire il cancello ma c'è un **lucchetto** che lo blocca.\n",
+     2, {}},
     {"albero",
-     "albero waw\n",
-     1},
+     "L'albero è secco e nodoso. Nel suo tronco vedi un ++buco++.",
+     1,
+     {&oggetti_cimitero[0]}},
     {"buco",
      "stocazzo\n",1},
     {"chiesa",
@@ -61,11 +65,23 @@ static scenario *scenari[] = {
 
 /* FUNZIONI DI UTILITÀ ==================== */
 
+/*  loc: locazione della quale va ritornata la descrizione
+    buffer: buffer nel quale ritornare la descrizione
+    
+    Mette in buffer la descrizione della locazione, usando solo gli oggetti
+    effettivamente presenti. */
 char* descrizione_locazione(locazione *loc)
 {
-/* TODO: concatenare la descrizione base con le descrizioni degli oggetti 
-    non presi ancora. */
-    return NULL;
+    /* TODO: capire come implementare questa funzione */
+    /* int i;
+    strcpy(buffer, loc->descrizione_iniziale);
+    for(i = 0; i < loc->n_oggetti; i++) {
+        strcat(buffer, loc->oggetti[i]->descrizione_locazione);
+    } */
+    static char tmp[1024];
+    memset(tmp, 0, sizeof(tmp));
+    strcpy(tmp, loc->descrizione_iniziale);
+    return tmp;
 }
 
 /* IMPLEMENTAZIONE FUNZIONI HEADER ============= */
@@ -105,26 +121,36 @@ char* prendi_descrizione(char *opzione)
     return "Oggetto/Locazione non trovata.\n";
 }
 
-char* prendi_oggetto(struct sockaddr_in addr,char *obj)
+char* prendi_oggetto(struct sockaddr_in addr, char *nome_obj)
 {
     int i;
     scenario *scen = scenari[scenario_scelto];
     for(i = 0; i < scen->n_oggetti; i++) {
-        if(strcmp(obj, scen->oggetti[i].nome) != 0) {
+        oggetto *obj = &scen->oggetti[i]; 
+        if(strcmp(nome_obj, obj->nome) != 0) {
             continue;
         }
-        if(scen->oggetti[i].is_bloccato) {
+        /* if(obj->is_bloccato) {
             return "Oggetto bloccato!\n";
-        }
-        if(scen->oggetti[i].is_preso) {
+        } */
+        if(obj->is_preso) {
             return "Oggetto già preso!\n";
         }
+        if(obj->has_enigma) {
         /* TODO: se c'è enigma attivarlo */
-        scen->oggetti[i].is_preso = true;
-        scen->oggetti[i].addr_possessore = addr;
+        }
+
+        obj->is_preso = true;
+        obj->addr_possessore = addr;
         return "Oggetto raccolto!\n";
     }
     return "Oggetto non trovato.\n";
+}
+
+char* utilizza_oggetti(struct sockaddr_in cl_addr, char *nome_obj1, char *nome_obj2)
+{
+    
+    return "sium\n";
 }
 
 char* inizia_scenario(int id_scenario)

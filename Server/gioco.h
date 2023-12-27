@@ -12,7 +12,10 @@ typedef struct oggetto {
     char *descrizione_bloccato;
     char *descrizione_sbloccato;
     char *descrizione_locazione;
+    /* se è bloccato non può essere il primo parametro di use */
     bool is_bloccato;
+    /* se ha un enigma deve essere risolto prima di prenderlo */
+    bool has_enigma;
     bool is_preso;
     struct sockaddr_in addr_possessore;
     /* TODO: salvare IP di chi prende l'oggetto per verificare se può usarlo con la use
@@ -49,6 +52,7 @@ typedef struct gruppo {
 void prendi_scenari(char *);
 char* prendi_descrizione(char *);
 char* prendi_oggetto(struct sockaddr_in, char *);
+char* utilizza_oggetti(struct sockaddr_in, char *, char *);
 char* inizia_scenario(int);
 bool is_game_started();
 
