@@ -10,21 +10,43 @@ static oggetto oggetti_cimitero[] = {
     {"lucchetto", 
      "Sembra che serva una chiave per aprirlo...\n",
      "Il lucchetto è sbloccato adesso.\n",
-     "\n",
-     true, false},
+     "C'è un **lucchetto** che lo blocca.\n",
+     true, true, false
+    },
     {"libro",
      "tapa tapa ", 
      "\n",
      "\n",
-     true, false},
+     true, false, false
+    },
     {"boh", "hi hi",
      "\n",
      "\n",
-     false, false},
+     false, false, false
+    },
     {"boh", "hi hi",
      "\n",
      "\n",
-     false, false}
+     false, false, false
+    },
+    {"scatola",
+     "La scatola sembra ben solida, serve una chiave per aprirla.\n",
+     "Hai aperto la scatola, al suo interno c'è ???(messo nell'inventario).\n",
+     "Ai suoi piedi c'è una **scatola**.\n",
+     false, false, false
+    },
+    {"foglietto",
+     NULL,
+     "scritta di aiuto\n",
+     "All'interno c'è un **foglietto**.\n",
+     false, false, false
+    },
+    {"scritta rovinata",
+     "scritte ENIGMA\n",
+     "scritte ENIGMA\n",
+     "Sopra c'è una **scritta rovinata**.\n",
+     false, false, false
+    }
 };
 
 static const utilizzo tabella_utilizzi_cimitero[] = {
@@ -33,20 +55,23 @@ static const utilizzo tabella_utilizzi_cimitero[] = {
 
 static locazione locazioni_cimitero[] = {
     {"cancello",
-     "Provi ad aprire il cancello ma c'è un **lucchetto** che lo blocca.\n",
-     2, {}},
+     "È l'unica via d'uscita. ",
+     1, {&oggetti_cimitero[0]}},
     {"albero",
-     "L'albero è secco e nodoso. Nel suo tronco vedi un ++buco++.",
-     1,
-     {&oggetti_cimitero[0]}},
+     "L'albero è secco e nodoso. Nel suo tronco vedi un ++buco++. ",
+     1, {&oggetti_cimitero[4]}},
     {"buco",
-     "stocazzo\n",1},
+     "Riesci a malapena a vedere cosa ci sia.",
+     1, {&oggetti_cimitero[5]}},
     {"chiesa",
-     "chiesa sesso",1},
+     "La chiesa all'interno è tetra e fai fatica a vedere. ",
+     1,
+     },
     {"altare",
      "basdad",1},
     {"tomba",
-     "buh",1}
+     "La tomba è malcurata e cade a pezzi. ",
+     1, NULL},
 };
 
 static scenario scenario_cimitero = {
@@ -54,7 +79,8 @@ static scenario scenario_cimitero = {
     "Ti trovi in un cimitero, l'unica uscita è un ++cancello++. Alla\n"
     "sua sinistra vedi un ++albero++ secco, lì accanto è presente una\n"
     "++tomba++. Dietro di te c'è una ++chiesa++.\n",
-    3, 6,
+    sizeof(oggetti_cimitero), 
+    sizeof(locazioni_cimitero),
     oggetti_cimitero,
     locazioni_cimitero
 };
@@ -72,15 +98,20 @@ static scenario *scenari[] = {
     effettivamente presenti. */
 char* descrizione_locazione(locazione *loc)
 {
-    /* TODO: capire come implementare questa funzione */
-    /* int i;
-    strcpy(buffer, loc->descrizione_iniziale);
-    for(i = 0; i < loc->n_oggetti; i++) {
-        strcat(buffer, loc->oggetti[i]->descrizione_locazione);
-    } */
+    int i;
     static char tmp[1024];
     memset(tmp, 0, sizeof(tmp));
     strcpy(tmp, loc->descrizione_iniziale);
+    if(loc->n_oggetti == 0) {
+        return tmp;
+    }
+
+    for(i = 0; i < loc->n_oggetti; i++) {
+        if(loc->oggetti[i]->is_preso) {
+            continue;
+        }
+        strcat(tmp, loc->oggetti[i]->descrizione_locazione);
+    }
     return tmp;
 }
 
