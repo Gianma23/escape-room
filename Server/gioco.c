@@ -85,9 +85,10 @@ char* prendi_descrizione(char *opzione)
 char* prendi_oggetto(struct sockaddr_in addr, char *nome_obj)
 {
     int i;
+    oggetto *obj;
     scenario *scen = scenari[scenario_scelto];
     for(i = 0; i < scen->n_oggetti; i++) {
-        oggetto *obj = &scen->oggetti[i]; 
+        obj = &scen->oggetti[i]; 
         if(strcmp(nome_obj, obj->nome) != 0) {
             continue;
         }
@@ -110,6 +111,31 @@ char* prendi_oggetto(struct sockaddr_in addr, char *nome_obj)
 
 char* utilizza_oggetti(struct sockaddr_in cl_addr, char *nome_obj1, char *nome_obj2)
 {
+    int i;
+    oggetto *obj = NULL;
+    scenario *scen = scenari[scenario_scelto];
+    for(i = 0; i < scen->n_oggetti; i++) {
+        if(strcmp(nome_obj1, scen->oggetti[i].nome) != 0) {
+            obj = &scen->oggetti[i]; 
+            break;
+        }
+    }
+    if(obj == NULL) {
+        return "Oggetto non trovato.\n";
+    }
+    if(!obj->is_preso) {
+        return "Non hai questo oggetto nel tuo inventario.\n";
+    }
+    if(!compara_addr(&cl_addr, &obj->addr_possessore)) {
+        return "L'altro giocatore ha l'oggetto.\n";
+    }
+    
+    for(i = 0; i < scen->n_utilizzi; i++) {
+        utilizzo *util = &scen->utilizzi[i];
+        if(strcmp(nome_obj1, util->primo) == 0 && strcmp(nome_obj2, util->secondo) == 0) {
+            return "Utilizzo corretto.\n";
+        }
+    }
     
     return "sium\n";
 }

@@ -34,8 +34,10 @@ typedef struct scenario {
     char *descrizione;
     int n_oggetti;
     int n_locazioni;
+    int n_utilizzi;
     oggetto *oggetti;
     locazione *locazioni;
+    utilizzo *utilizzi;
 } scenario;
 
 typedef struct utilizzo {

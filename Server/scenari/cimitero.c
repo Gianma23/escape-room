@@ -15,9 +15,10 @@ oggetto oggetti_cimitero[] = {
      "Accanto c'è un **libro**.\n",
      true, false, false
     },
-    {"boh", "hi hi",
-     "\n",
-     "\n",
+    {"statua",
+     "Una statua di un angelo, ha le mani pronte a ricevere qualcosa.\n",
+     "sbloccato\n",
+     "Dietro c'è una **statua**.\n",
      false, false, false
     },
     {"boh", "hi hi",
@@ -46,7 +47,11 @@ oggetto oggetti_cimitero[] = {
 };
 
 utilizzo tabella_utilizzi_cimitero[] = {
-    {"chiave", "lucchetto"}
+    {"chiave", "lucchetto"},
+    {"gemma", "scatola"},
+    {"pezzo", "statua"},
+    {"torcia", "scritta rovinata"},
+    {"foglietto", "pagina strappata"}
 };
 
 locazione locazioni_cimitero[] = {
@@ -60,11 +65,11 @@ locazione locazioni_cimitero[] = {
      "Riesci a malapena a vedere cosa ci sia. ",
      1, {&oggetti_cimitero[5]}},
     {"chiesa",
-     "La chiesa all'interno è tetra e fai fatica a vedere. Intravedi un ++altare++. ALTRO\n",
+     "La chiesa all'interno è tetra e fai fatica a vedere. Intravedi un ++altare++. ",
      1, {&oggetti_cimitero[1]}},
     {"altare",
      "L'altare è illuminato da una fioca luce. ",
-     1},
+     1, {}},
     {"tomba",
      "La tomba è malcurata e cade a pezzi. ",
      1, {}},
@@ -77,6 +82,8 @@ scenario scenario_cimitero = {
     "++tomba++. Dietro di te c'è una ++chiesa++.\n",
     sizeof(oggetti_cimitero), 
     sizeof(locazioni_cimitero),
+    sizeof(tabella_utilizzi_cimitero),
     oggetti_cimitero,
-    locazioni_cimitero
+    locazioni_cimitero,
+    tabella_utilizzi_cimitero
 };
