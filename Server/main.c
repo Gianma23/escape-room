@@ -117,13 +117,14 @@ int main(int argc, char *argv[])
                 else {
                     ret = ricevi_messaggio(i, buffer, "Errore ricezione comando dal client\n");
                     if(ret == STDIN_FILENO) {
-                        printf("Client disconnesso...\n");
+                        printf("Sconnessione client in corso...\n");
                         /* printf("%s", logout_user(i)); */
                         /* TODO: funzione reset scenario, gruppo e logout di tutti */
                         close(i);
                         printf("Socket %d chiuso.\n", i);
                         FD_CLR(i, &master);
-                        printf("Socket rimosso dal set dei descrittori.\n\n");
+                        printf("Socket rimosso dal set dei descrittori.\n"
+                               "Sconnessione client effettuata con successo.\n\n");
                         continue;
                     }
                     

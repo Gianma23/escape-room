@@ -26,8 +26,8 @@ oggetto oggetti_cimitero[] = {
      false, false, false
     },
     {"scatola",
-     "La scatola sembra ben solida, serve una chiave per aprirla.\n",
-     "Hai aperto la scatola, al suo interno c'è ? (messo nell'inventario).\n",
+     "Una scatola di metallo arrugginita, serve una chiave per aprirla.\n",
+     "Hai aperto la scatola, al suo interno c'è TODO (messo nell'inventario).\n",
      "Ai suoi piedi c'è una **scatola**.\n",
      false, false, false
     },

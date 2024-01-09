@@ -5,6 +5,7 @@
 #include "dispatcher.h"
 #include "auth.h"
 #include "gioco.h"
+#include "timer.h"
 
 static gruppo giocatori = {};
 
@@ -73,6 +74,7 @@ char* handler_start(struct sockaddr_in cl_addr, char* opt)
     if(strtok(NULL, " ") != NULL) {
         return "Troppi parametri.\n";
     }
+    start_timer(1800); /* mezz'ora di tempo per completare lo scenario */
     return inizia_scenario(id_scenario);
 }
 
@@ -174,8 +176,10 @@ static const comando lista_comandi_server[] = {
 void command_dispatcher(int socket, char *buffer, char *soggetto)
 {
     int i;
+    int time;
     char *opt;
     char *com;
+    char risposta[1024];
     const comando *lista_comandi = strcmp(soggetto, "server") == 0 ? lista_comandi_server : lista_comandi_client;
     const int N_COMANDI = strcmp(soggetto, "server") == 0 ? N_COMANDI_SERVER : N_COMANDI_CLIENT;
     
@@ -195,8 +199,19 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
             socklen_t len = sizeof(cl_addr);
             memset(&cl_addr, 0, sizeof(cl_addr));
             getpeername(socket, (struct sockaddr*)&cl_addr, &len);
-            /* chiamo l'handler del comando */
-            char* risposta = lista_comandi[i].handler(cl_addr, opt);
+
+            memset(risposta, 0, sizeof(risposta));
+
+            if(is_game_started() && (time = remaining_time()) <= 0) {
+                strcpy(risposta, "Tempo scaduto! Il gioco è finito.\n");
+                /* TODO: reset gioco */
+            }
+            else if(is_game_started()){
+                sprintf(risposta, "- Rimanenti %d minuti e %d secondi.\n\n", time/60, time%60);
+                /* TODO stampare token rimanenti */
+            }
+            strcat(risposta, lista_comandi[i].handler(cl_addr, opt));
+
             invia_messaggio(socket, risposta, "Errore invio risposta al comando");
             return;
         }

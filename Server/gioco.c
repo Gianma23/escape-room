@@ -51,6 +51,10 @@ void prendi_scenari(char *buf)
     }
 }
 
+/*  opzione: locazione o oggetto del quale bisogna prendere la descrizione
+    
+    Ritorna la descrizione di opzione. Se è una locazione la sua descrizione
+    contiene solo gli oggetti presenti, cioè non presi dal giocatore */
 char* prendi_descrizione(char *opzione)
 {
     int i;
@@ -73,6 +77,11 @@ char* prendi_descrizione(char *opzione)
     return "Oggetto/Locazione non trovata.\n";
 }
 
+/*  addr: indirizzo del giocatore che vuole prendere
+    nome_obj: oggetto che vuole prendere
+    
+    Assegna l'oggetto nome_obj al giocatore di indirizzo addr, se non
+    già preso. Se l'oggetto ha un enigma viene attivato. */
 char* prendi_oggetto(struct sockaddr_in addr, char *nome_obj)
 {
     int i;
@@ -105,6 +114,7 @@ char* utilizza_oggetti(struct sockaddr_in cl_addr, char *nome_obj1, char *nome_o
     return "sium\n";
 }
 
+/* Setta lo scenario scelto con id_scenario */
 char* inizia_scenario(int id_scenario)
 {
     if(id_scenario < 0 || id_scenario >= N_SCENARI) {
@@ -112,6 +122,17 @@ char* inizia_scenario(int id_scenario)
     }
     scenario_scelto = id_scenario;
     return "Scenario iniziato, buona fortuna!\n";
+}
+
+/* Resetta lo scenario id_scenario ai valori di default */
+bool reset_scenario(int id_scenario)
+{
+    if(id_scenario < 0 || id_scenario >= N_SCENARI) {
+        return false;
+    }
+    /* TODO:  resettare per ogni oggetto le impostazioni di default */
+    scenario_scelto = -1;
+    return true;
 }
 
 /* Ritorna true se è stato scelto uno scenario e dunque è in corso una partita */

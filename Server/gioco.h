@@ -54,6 +54,7 @@ char* prendi_descrizione(char *);
 char* prendi_oggetto(struct sockaddr_in, char *);
 char* utilizza_oggetti(struct sockaddr_in, char *, char *);
 char* inizia_scenario(int);
+bool reset_scenario(int);
 bool is_game_started();
 
 #endif
