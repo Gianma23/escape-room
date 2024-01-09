@@ -1,7 +1,7 @@
 all: server client other clean
 
-server: server.o utility.o dispatcher.o auth.o gioco.o
-	gcc -Wall server.o utility.o dispatcher.o auth.o gioco.o -o server 
+server: server.o utility.o dispatcher.o auth.o gioco.o cimitero.o
+	gcc -Wall server.o utility.o dispatcher.o auth.o gioco.o cimitero.o -o server 
 
 client: client.o utility.o 
 	gcc -Wall client.o -o client
@@ -23,6 +23,9 @@ dispatcher.o: Server/dispatcher.c Server/dispatcher.h
 
 gioco.o: Server/gioco.c Server/gioco.h
 	gcc -Wall -g -c -std=c89 Server/gioco.c -o gioco.o
+
+cimitero.o: Server/scenari/cimitero.c Server/scenari/cimitero.h
+	gcc -Wall -g -c -std=c89 Server/scenari/cimitero.c -o cimitero.o
 
 auth.o: Server/auth.c Server/auth.h
 	gcc -Wall -g -c -std=c89 Server/auth.c -o auth.o
