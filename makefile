@@ -1,10 +1,13 @@
-all: server client clean
+all: server client other clean
 
 server: server.o utility.o dispatcher.o auth.o gioco.o
 	gcc -Wall server.o utility.o dispatcher.o auth.o gioco.o -o server 
 
 client: client.o utility.o 
 	gcc -Wall client.o -o client
+
+other: client.o utility.o 
+	gcc -Wall client.o -o other
 
 client.o: Client/main.c
 	gcc -Wall -g -c -std=c89 Client/main.c -o client.o
