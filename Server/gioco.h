@@ -12,11 +12,11 @@ typedef struct oggetto {
     char *descrizione_bloccato;
     char *descrizione_sbloccato;
     char *descrizione_locazione;
-    /* se è bloccato non può essere il primo parametro di use */
+    /* se è bloccato non può essere preso */
     bool is_bloccato;
+    bool is_preso;
     /* se ha un enigma deve essere risolto prima di prenderlo */
     bool has_enigma;
-    bool is_preso;
     struct sockaddr_in addr_possessore;
     /* TODO: salvare IP di chi prende l'oggetto per verificare se può usarlo con la use
         (non ci sarebbe questo problema senza multiplayer) */
@@ -32,6 +32,7 @@ typedef struct locazione {
 typedef struct utilizzo {
     char *primo;
     char *secondo;
+    oggetto *oggetto_nascosto;
 } utilizzo;
 
 typedef struct scenario {
@@ -52,10 +53,11 @@ typedef struct gruppo {
 } gruppo;
 
 void prendi_scenari(char *);
+char* inizia_scenario(int);
 char* prendi_descrizione(char *);
+char* prendi_inventario(struct sockaddr_in);
 char* prendi_oggetto(struct sockaddr_in, char *);
 char* utilizza_oggetti(struct sockaddr_in, char *, char *);
-char* inizia_scenario(int);
 bool reset_scenario(int);
 bool is_game_started();
 

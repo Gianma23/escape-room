@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
         perror("Errore in fase di creazione del socket");
         exit(1);
     }
-    
+
     ret = setsockopt(list_sock, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
     if(ret < 0) {
         perror("Errore in fase di setsockopt");
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
                     prendi_scenari(buffer);
                     invia_messaggio(comm_sock, buffer, "Errore invio scenari\n");
                     comandi_client(buffer);
-                    invia_messaggio(comm_sock, buffer, "Errore invio scenari\n");
+                    invia_messaggio(comm_sock, buffer, "Errore invio comandi\n");
                     printf("Scenari e comandi disponibili inviati.\n\n");
 
                     FD_SET(comm_sock, &master);

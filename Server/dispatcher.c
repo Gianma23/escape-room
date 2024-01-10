@@ -113,6 +113,25 @@ char* handler_take(struct sockaddr_in cl_addr, char* opt)
     return prendi_oggetto(cl_addr, oggetto);
 }
 
+char* handler_drop(struct sockaddr_in cl_addr, char* opt)
+{
+    if(!is_logged(cl_addr)) {
+        return "Non sei loggato!\n";
+    }
+    if(!is_game_started()) {
+        return "Nessuno scenario iniziato. Fare prima start <stanza>\n";
+    }
+
+    char* oggetto = strtok(opt, " ");
+    if(oggetto == NULL) {
+        return "Specificare l'oggetto da lasciare.\n";
+    }
+    if(strtok(NULL, " ") != NULL) {
+        return "Troppi parametri.\n";
+    }
+    return /* lascia_oggetto(cl_addr, oggetto) */"TODO\n";
+}
+
 char* handler_use(struct sockaddr_in cl_addr, char* opt)
 {
     if(!is_logged(cl_addr)) {
@@ -131,6 +150,17 @@ char* handler_use(struct sockaddr_in cl_addr, char* opt)
         return "Troppi parametri.\n";
     }
     return utilizza_oggetti(cl_addr, obj1, obj2);
+}
+
+char* handler_objs(struct sockaddr_in cl_addr, char* opt)
+{
+    if(!is_logged(cl_addr)) {
+        return "Non sei loggato!\n";
+    }
+    if(!is_game_started()) {
+        return "Nessuno scenario iniziato. Fare prima start <stanza>\n";
+    }
+    return prendi_inventario(cl_addr);
 }
 
 char* handler_end(struct sockaddr_in cl_addr, char *opt)
@@ -156,7 +186,9 @@ static const comando lista_comandi_client[] = {
     {"start", handler_start, " <stanza>\tinizia uno scenario"},
     {"look", handler_look,"bohhh"},
     {"take", handler_take, "<username> <password>\tregistra un nuovo account"},
+    {"drop", handler_drop, "<username> <password>\tregistra un nuovo account"},
     {"use", handler_use, "<username> <password>\tregistra un nuovo account"},
+    {"objs", handler_objs, "\t\tmostra il tuo inventario"},
     {"end", handler_end, "<username> <password>\tregistra un nuovo account"}
 };
 

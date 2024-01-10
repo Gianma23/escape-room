@@ -111,11 +111,18 @@ char* prendi_oggetto(struct sockaddr_in addr, char *nome_obj)
     return "Oggetto non trovato.\n";
 }
 
-char* utilizza_oggetti(struct sockaddr_in cl_addr, char *nome_obj1, char *nome_obj2)
+/*  addr: indirizzo del giocatore
+    nome_obj1: oggetto attivo che deve avere nell'inventario
+    nome_obj2: oggetto passivo, può anche essere bloccato
+    
+    Utilizza l'oggetto nome_obj1 su nome_obj2, solo se nome_obj1 è nell'inventario
+    del giocatore che chiama il comando e l'utilizzo è previsto dallo scenario  */
+char* utilizza_oggetti(struct sockaddr_in addr, char *nome_obj1, char *nome_obj2)
 {
     int i;
     oggetto *obj = NULL;
     scenario *scen = scenari[scenario_scelto];
+    static char ret[256];
     for(i = 0; i < scen->n_oggetti; i++) {
         if(strcmp(nome_obj1, scen->oggetti[i].nome) != 0) {
             obj = &scen->oggetti[i]; 
@@ -128,18 +135,37 @@ char* utilizza_oggetti(struct sockaddr_in cl_addr, char *nome_obj1, char *nome_o
     if(!obj->is_preso) {
         return "Non hai questo oggetto nel tuo inventario.\n";
     }
-    if(!compara_addr(&cl_addr, &obj->addr_possessore)) {
+    if(!compara_addr(&addr, &obj->addr_possessore)) {
         return "L'altro giocatore ha l'oggetto.\n";
     }
     
     for(i = 0; i < scen->n_utilizzi; i++) {
         utilizzo *util = &scen->utilizzi[i];
         if(strcmp(nome_obj1, util->primo) == 0 && strcmp(nome_obj2, util->secondo) == 0) {
-            return "Utilizzo corretto.\n";
+            util->oggetto_nascosto->is_bloccato = false;
+            sprintf(ret, "Oggetto %s usato su %s con successo!\n", nome_obj1, nome_obj2);
+            return ret;
         }
     }
+    return "Utilizzo non previsto.\n";
+}
+
+char* prendi_inventario(struct sockaddr_in addr)
+{
+    int i;
+    scenario *scen = scenari[scenario_scelto];
+    static char ret[1024];
     
-    return "sium\n";
+    memset(ret, 0, sizeof(ret));
+    strcat(ret, "Inventario:\n");
+    for(i = 0; i < scen->n_oggetti; i++) {
+        oggetto *obj = &scen->oggetti[i];
+        if(compara_addr(&addr, &obj->addr_possessore)) {
+            strcat(ret, obj->nome);
+            strcat(ret, "\n");
+        }
+    }
+    return ret;
 }
 
 /* Setta lo scenario scelto con id_scenario */

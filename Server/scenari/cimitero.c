@@ -28,8 +28,8 @@ oggetto oggetti_cimitero[] = {
      false, false, false
     },
     {"libro",
-     "", 
-     "\n",
+     "Il libro è molto vecchio, c'è una **pagina strappata**.\n", 
+     "ora si può leggere la **pagina intera**\n",
      "Accanto c'è un **libro**.\n",
      true, false, false
     },
@@ -38,12 +38,25 @@ oggetto oggetti_cimitero[] = {
      "Enigma risolto.\n",
      "Sopra c'è una **scritta rovinata**.\n",
      false, true, false
+    },
+    /* oggetti nascosti, dati dalle use */
+    {"torcia UV",
+     "blabla\n",
+     "blabla",
+     false, false, false
+    },
+    {"chiave",
+     "blabla\n",
+     "blabla",
+     false, false, false
     }
 };
 
 utilizzo tabella_utilizzi_cimitero[] = {
     {"chiave", "lucchetto"},
-    {"gemma", "scatola"},
+    {"gemma", "scatola", &oggetti_cimitero[6]},
+    {"libro", "statua"},
+    {"torcia UV", "scritta rovinata"},
     {"pezzo", "statua"},
     {"torcia", "scritta rovinata"},
     {"foglietto", "pagina strappata"}
