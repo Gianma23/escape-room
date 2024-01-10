@@ -181,15 +181,16 @@ return NULL;
 static const comando lista_comandi_client[] = {
     {"register", handler_register, " <username> <password>\tregistra un nuovo account"},
     {"login", handler_login, " <username> <password>\taccedi con un account"},
-    {"startgroup", handler_startgroup, "\t\tinizializza un gruppo di gioco"},
-    {"joingroup", handler_joingroup, "\t\tentra in un gruppo se è stato creato"},
-    {"start", handler_start, " <stanza>\tinizia uno scenario"},
-    {"look", handler_look,"bohhh"},
-    {"take", handler_take, "<username> <password>\tregistra un nuovo account"},
-    {"drop", handler_drop, "<username> <password>\tregistra un nuovo account"},
-    {"use", handler_use, "<username> <password>\tregistra un nuovo account"},
+    {"startgroup", handler_startgroup, "\t\t\tinizializza un gruppo di gioco"},
+    {"joingroup", handler_joingroup, "\t\t\tentra in un gruppo se è stato creato"},
+    {"start", handler_start, " <stanza>\t\t\tinizia uno scenario"},
+    {"look", handler_look,"<oggetto>\t\t\tmostra la descrizione dell'oggetto, se oggetto non è\n"
+                          "\t\t\t\t\tspecificato mostra la descrizione della stanza"},
+    {"take", handler_take, "<oggetto>\t\t\tprende l'oggetto se non bloccato"},
+    {"drop", handler_drop, "<oggetto>\t\t\tlascia l'oggetto se nell'inventario"},
+    {"use", handler_use, "<oggetto1> <oggetto2>\tutilizza l'oggetto1 su oggetto2"},
     {"objs", handler_objs, "\t\tmostra il tuo inventario"},
-    {"end", handler_end, "<username> <password>\tregistra un nuovo account"}
+    {"end", handler_end, "\t\t\ttermina la partita. Se è avviato un gruppo termina per tutti"}
 };
 
 static const comando lista_comandi_server[] = {

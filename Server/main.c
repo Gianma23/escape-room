@@ -112,10 +112,10 @@ int main(int argc, char *argv[])
                     /* invio al client degli scenari e comandi disponibili */
                     /* TODO: mettere in una sola send */
                     memset(buffer, 0, sizeof(buffer));
-                    prendi_scenari(buffer);
-                    invia_messaggio(comm_sock, buffer, "Errore invio scenari\n");
                     comandi_client(buffer);
                     invia_messaggio(comm_sock, buffer, "Errore invio comandi\n");
+                    prendi_scenari(buffer);
+                    invia_messaggio(comm_sock, buffer, "Errore invio scenari\n");
                     printf("Scenari e comandi disponibili inviati.\n\n");
 
                     FD_SET(comm_sock, &master);

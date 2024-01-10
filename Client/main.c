@@ -34,12 +34,15 @@ int main(int argc, char *argv[])
         exit(1);
     }
     
+    printf("======================================================\n");
     memset(buffer, 0, sizeof(buffer));
     ricevi_messaggio(cl_sock, buffer, "errore");
     printf("%s", buffer);
+    printf("======================================================\n");
     memset(buffer, 0, sizeof(buffer));
     ricevi_messaggio(cl_sock, buffer, "errore");
     printf("%s", buffer);
+    printf("======================================================\n");
 
     for(;;) {
         memset(buffer, 0, sizeof(buffer));
