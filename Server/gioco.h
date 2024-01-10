@@ -29,6 +29,11 @@ typedef struct locazione {
     oggetto *oggetti[MAX_OGGETTI_LOCAZIONE];
 } locazione;
 
+typedef struct utilizzo {
+    char *primo;
+    char *secondo;
+} utilizzo;
+
 typedef struct scenario {
     char *nome;
     char *descrizione;
@@ -39,11 +44,6 @@ typedef struct scenario {
     locazione *locazioni;
     utilizzo *utilizzi;
 } scenario;
-
-typedef struct utilizzo {
-    char *primo;
-    char *secondo;
-} utilizzo;
 
 typedef struct gruppo {
     bool attivo;

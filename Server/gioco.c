@@ -7,7 +7,8 @@ static int scenario_scelto = -1;
 
 static scenario *scenari[] = {
     &scenario_cimitero
-    /* qui possono essere aggiunti altri scenari, includendo la loro interfaccia */
+    /* qui possono essere aggiunti altri scenari, 
+    includendo la loro interfaccia */
 };
 
 /* FUNZIONI DI UTILITÀ ==================== */
@@ -62,13 +63,14 @@ char* prendi_descrizione(char *opzione)
     if(opzione == NULL) {
         return scen->descrizione;
     }
-    
+    printf("%d\n", scen->n_oggetti);
     for(i = 0; i < scen->n_oggetti; i++) {
         oggetto *obj = &scen->oggetti[i]; 
         if(strcmp(opzione, obj->nome) == 0) {
             return obj->is_bloccato ? obj->descrizione_bloccato : obj->descrizione_sbloccato;
         }
     }
+    printf("ciao\n");
     for(i = 0; i < scen->n_locazioni; i++) {
         if(strcmp(opzione, scen->locazioni[i].nome) == 0) {
             return descrizione_locazione(&scen->locazioni[i]);

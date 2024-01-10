@@ -9,6 +9,7 @@
 #include "../utility.c"
 
 #define SERVER_IP "127.0.0.1"
+#define SERVER_PORT 4242
 #define BUFFER_DIM 1024
 #define COMANDO_DIM 64
 
@@ -17,7 +18,7 @@ int main(int argc, char *argv[])
     int ret;
     int cl_sock;
     struct sockaddr_in sv_addr;
-    in_port_t porta = htons(atoi(argv[1]));
+    in_port_t porta = htons(SERVER_PORT);
     char buffer[BUFFER_DIM];
 
     cl_sock = socket(AF_INET, SOCK_STREAM, 0);

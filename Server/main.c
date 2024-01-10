@@ -50,6 +50,16 @@ int main(int argc, char *argv[])
 
     printf("Avvio del server in corso...\n");
     list_sock = socket(AF_INET, SOCK_STREAM, 0);
+    if(list_sock < 0) {
+        perror("Errore in fase di creazione del socket");
+        exit(1);
+    }
+    
+    ret = setsockopt(list_sock, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
+    if(ret < 0) {
+        perror("Errore in fase di setsockopt");
+        exit(1);
+    }
 
     memset(&sv_addr, 0, sizeof(sv_addr));
     sv_addr.sin_family = AF_INET;

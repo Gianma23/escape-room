@@ -9,23 +9,6 @@ oggetto oggetti_cimitero[] = {
      "C'è un **lucchetto** che lo blocca.\n",
      true, true, false
     },
-    {"libro",
-     "", 
-     "\n",
-     "Accanto c'è un **libro**.\n",
-     true, false, false
-    },
-    {"statua",
-     "Una statua di un angelo, ha le mani pronte a ricevere qualcosa.\n",
-     "sbloccato\n",
-     "Dietro c'è una **statua**.\n",
-     false, false, false
-    },
-    {"boh", "hi hi",
-     "\n",
-     "\n",
-     false, false, false
-    },
     {"scatola",
      "Una scatola di metallo arrugginita, serve una chiave per aprirla.\n",
      "Hai aperto la scatola, al suo interno c'è TODO (messo nell'inventario).\n",
@@ -33,10 +16,22 @@ oggetto oggetti_cimitero[] = {
      false, false, false
     },
     {"foglietto",
-     NULL,
+     "NULL",
      "indizio\n",
      "All'interno c'è un **foglietto**.\n",
      false, false, false
+    },
+    {"statua",
+     "Una statua di un angelo, ha le mani pronte a ricevere qualcosa.\n",
+     "sbloccato\n",
+     "Dietro c'è una **statua**.\n",
+     false, false, false
+    },
+    {"libro",
+     "", 
+     "\n",
+     "Accanto c'è un **libro**.\n",
+     true, false, false
     },
     {"scritta rovinata",
      "L'oggetto ha un enigma, fare take per avviarlo.\n",
@@ -60,19 +55,19 @@ locazione locazioni_cimitero[] = {
      1, {&oggetti_cimitero[0]}},
     {"albero",
      "L'albero è secco e nodoso. Nel suo tronco vedi un ++buco++. ",
-     1, {&oggetti_cimitero[4]}},
+     1, {&oggetti_cimitero[1]}},
     {"buco",
      "Riesci a malapena a vedere cosa ci sia. ",
-     1, {&oggetti_cimitero[5]}},
+     1, {&oggetti_cimitero[2]}},
     {"chiesa",
      "La chiesa all'interno è tetra e fai fatica a vedere. Intravedi un ++altare++. ",
-     1, {&oggetti_cimitero[1]}},
+     1, {&oggetti_cimitero[3]}},
     {"altare",
      "L'altare è illuminato da una fioca luce. ",
-     1, {}},
+     1, {&oggetti_cimitero[4]}},
     {"tomba",
      "La tomba è malcurata e cade a pezzi. ",
-     1, {}},
+     1, {&oggetti_cimitero[5]}},
 };
 
 scenario scenario_cimitero = {
@@ -80,9 +75,9 @@ scenario scenario_cimitero = {
     "Ti trovi in un cimitero, l'unica uscita è un ++cancello++. Alla\n"
     "sua sinistra vedi un ++albero++ secco, lì accanto è presente una\n"
     "++tomba++. Dietro di te c'è una ++chiesa++.\n",
-    sizeof(oggetti_cimitero), 
-    sizeof(locazioni_cimitero),
-    sizeof(tabella_utilizzi_cimitero),
+    N_OGGETTI_CIMITERO, 
+    N_LOCAZIONI_CIMITERO,
+    N_UTILIZZI_CIMITERO,
     oggetti_cimitero,
     locazioni_cimitero,
     tabella_utilizzi_cimitero
