@@ -70,11 +70,15 @@ char* handler_start(struct sockaddr_in cl_addr, char* opt)
         return "Impossibile iniziare, il gioco è già iniziato!\n";
     }
 
-    int id_scenario = atoi(strtok(opt, " "));
+    char* str_scenario = strtok(opt, " ");
+    if(str_scenario == NULL) {
+        return "Specificare lo scenario da iniziare.\n";
+    }
+    int id_scenario = atoi(str_scenario);
     if(strtok(NULL, " ") != NULL) {
         return "Troppi parametri.\n";
     }
-    start_timer(1800); /* mezz'ora di tempo per completare lo scenario */
+    start_timer(600); /* 10 min di tempo per completare lo scenario */
     return inizia_scenario(id_scenario);
 }
 
@@ -251,6 +255,7 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
     }   
     /* TODO: riconoscimento comando simile */
     printf("comando non trovato.\n");
+    invia_messaggio(socket, "comando non trovato.\n", "Errore invio risposta comando non trovato");
 }
 
 /* La funzione restituisce i comandi disponibili al client */

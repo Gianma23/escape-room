@@ -5,7 +5,7 @@
 #include "../utility.h"
 
 #define N_COMANDI_SERVER 1
-#define N_COMANDI_CLIENT 9
+#define N_COMANDI_CLIENT 11
 #define COMANDO_DIM 64
 
 typedef struct comando {

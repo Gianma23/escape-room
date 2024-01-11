@@ -22,6 +22,7 @@ static scenario *scenari[] = {
 char* descrizione_locazione(locazione *loc)
 {
     int i;
+    int n_obj = 0;
     static char tmp[1024];
     memset(tmp, 0, sizeof(tmp));
     strcpy(tmp, loc->descrizione_iniziale);
@@ -139,18 +140,18 @@ char* utilizza_oggetti(struct sockaddr_in addr, char *nome_obj1, char *nome_obj2
     scenario *scen = scenari[scenario_scelto];
     static char ret[256];
 
-    oggetto *obj = cerca_oggetto(nome_obj2);
-    if(obj == NULL) {
-        return "Oggetto2 non trovato.\n";
-    }
-    obj = cerca_oggetto(nome_obj1);
-    if(obj == NULL) {
+    oggetto *obj1 = cerca_oggetto(nome_obj1);
+    if(obj1 == NULL) {
         return "Oggetto1 non trovato.\n";
     }
-    if(!obj->is_preso) {
+    oggetto *obj2 = cerca_oggetto(nome_obj2);
+    if(obj2 == NULL) {
+        return "Oggetto2 non trovato.\n";
+    }
+    if(!obj1->is_preso) {
         return "Non hai oggetto1 nel tuo inventario.\n";
     }
-    if(!compara_addr(&addr, &obj->addr_possessore)) {
+    if(!compara_addr(&addr, &obj1->addr_possessore)) {
         return "L'altro giocatore ha oggetto1.\n";
     }
     
@@ -163,10 +164,12 @@ char* utilizza_oggetti(struct sockaddr_in addr, char *nome_obj1, char *nome_obj2
                 util->oggetto_nascosto->is_nascosto = false;
             }
             /* blocco oggetto1 */
-            obj->is_bloccato = true;
-            obj->is_nascosto = true;
-            obj->is_preso = false;
-            memset(&obj->addr_possessore, 0, sizeof(obj->addr_possessore));
+            obj1->is_bloccato = true;
+            obj1->is_nascosto = true;
+            obj1->is_preso = false;
+            memset(&obj1->addr_possessore, 0, sizeof(obj1->addr_possessore));
+            /* sblocco oggetto2 */
+            obj2->is_bloccato = false;
             /* assegno un token e guardo se la partita è finita */
             token++;
             if(is_game_ended()) {
@@ -190,6 +193,7 @@ char* prendi_inventario(struct sockaddr_in addr)
     for(i = 0; i < scen->n_oggetti; i++) {
         oggetto *obj = &scen->oggetti[i];
         if(compara_addr(&addr, &obj->addr_possessore)) {
+            strcat(ret, "- ");
             strcat(ret, obj->nome);
             strcat(ret, "\n");
         }

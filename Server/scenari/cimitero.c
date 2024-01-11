@@ -17,7 +17,10 @@ oggetto oggetti_cimitero[] = {
     },
     {"foglietto",
      "NULL",
-     "indizio\n",
+     "---------      \n",
+     "         ----  \n"
+     "    | | | |  --\n"
+     "---------------\n"
      "All'interno c'è un **foglietto**.\n",
      false, false, false, false
     },
@@ -28,26 +31,26 @@ oggetto oggetti_cimitero[] = {
      false, false, false, false
     },
     {"libro",
-     "Il libro è molto vecchio, c'è una **pagina strappata**.\n", 
-     "ora si può leggere la **pagina strappata**\n",
+     "Il libro è molto vecchio, c'è una **pagina_strappata**.\n", 
+     "ora si può leggere la **pagina_strappata**\n",
      "Accanto c'è un **libro**.\n",
      true, false, false, false
     },
-    {"pagina strappata",
+    {"pagina_strappata",
      "---------------\n"
      "    | | | |  --\n"
      "         ----  \n"
-     " --------      \n",
+     "---------      \n",
      "---------------\n"
      "     sesso     \n"
      "---------------\n",
      "",
      true, false, false, false
     },
-    {"scritta rovinata",
+    {"scritta_rovinata",
      "L'oggetto ha un enigma, fare take per avviarlo.\n",
      "Enigma risolto.\n",
-     "Sopra c'è una **scritta rovinata**.\n",
+     "Sopra c'è una **scritta_rovinata**.\n",
      false, true, false, false
     },
     /* oggetti sbloccabili dalle use */
@@ -64,8 +67,8 @@ oggetto oggetti_cimitero[] = {
 };
 
 utilizzo tabella_utilizzi_cimitero[] = {
-    {"foglietto", "pagina strappata"},
-    {"torcia UV", "scritta rovinata"},
+    {"foglietto", "pagina_strappata"},
+    {"torcia UV", "scritta_rovinata"},
     {"pezzo", "statua"},
     {"gemma", "scatola", &oggetti_cimitero[6]},
     {"chiave", "lucchetto"}
