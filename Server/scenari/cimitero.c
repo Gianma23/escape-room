@@ -57,21 +57,36 @@ oggetto oggetti_cimitero[] = {
     },
     /* oggetti sbloccabili dalle use */
     {"torcia_UV",
-     "blabla\n",
-     "blabla",
+     "",
+     "Una torcia a raggi UV. È in grado di rivelare scritte nascoste.\n",
+     "",
+     false, false, false, true
+    },
+    {"spada",
+     "",
+     "una spada lucente\n",
+     "",
+     false, false, false, true
+    },
+    {"gemma",
+     "",
+     "Una gemma rossa di forma triangolare.\n",
+     "",
      false, false, false, true
     },
     {"chiave",
-     "blabla\n",
+     "",
      "blabla",
+     "",
      false, false, false, true
     }
 };
 
+/* TODO: aggiungere messaggio unico di utilizzo */
 utilizzo utilizzi_cimitero[] = {
     {"foglietto", "pagina_strappata", NULL, false},
     {"torcia_UV", "scritta_rovinata", NULL, true},
-    {"pezzo", "statua", NULL, false},
+    {"spada", "statua", NULL, false},
     {"gemma", "scatola", &oggetti_cimitero[6], true},
     {"chiave", "lucchetto"}
 };
