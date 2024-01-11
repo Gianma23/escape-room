@@ -35,7 +35,12 @@ typedef struct utilizzo {
     char *primo;
     char *secondo;
     oggetto *oggetto_nascosto;
+    bool has_token;
 } utilizzo;
+
+typedef struct enigma {
+
+} enigma;
 
 typedef struct scenario {
     char *nome;
@@ -61,6 +66,7 @@ char* prendi_descrizione(char *);
 char* prendi_inventario(struct sockaddr_in);
 char* prendi_oggetto(struct sockaddr_in, char *);
 char* utilizza_oggetti(struct sockaddr_in, char *, char *);
+int token_rimasti();
 bool reset_scenario(int);
 bool is_game_started();
 

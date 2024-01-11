@@ -244,8 +244,8 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
                 /* TODO: reset gioco */
             }
             else if(is_game_started()){
-                sprintf(risposta, "- Rimanenti %d minuti e %d secondi.\n\n", time/60, time%60);
-                /* TODO stampare token rimanenti */
+                sprintf(risposta, "- Rimanenti %d minuti e %d secondi.\n"
+                                  "- Token rimasti da trovare: %d\n\n", time/60, time%60, token_rimasti());
             }
             strcat(risposta, lista_comandi[i].handler(cl_addr, opt));
 

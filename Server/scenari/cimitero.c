@@ -16,7 +16,7 @@ oggetto oggetti_cimitero[] = {
      false, false, false, false
     },
     {"foglietto",
-     "NULL",
+     "",
      "---------      \n",
      "         ----  \n"
      "    | | | |  --\n"
@@ -26,26 +26,28 @@ oggetto oggetti_cimitero[] = {
     },
     {"statua",
      "Una statua di un angelo, ha le mani pronte a ricevere qualcosa.\n",
-     "sbloccato\n",
+     "Ai piedi della statua si è aperto un vano con una **gemma** dentro.\n",
      "Dietro c'è una **statua**.\n",
      false, false, false, false
     },
     {"libro",
-     "Il libro è molto vecchio, c'è una **pagina_strappata**.\n", 
-     "ora si può leggere la **pagina_strappata**\n",
+     "", 
+     "Il libro è molto vecchio, c'è una **pagina_strappata**.\n",
      "Accanto c'è un **libro**.\n",
-     true, false, false, false
+     false, false, false, false
     },
     {"pagina_strappata",
      "---------------\n"
      "    | | | |  --\n"
      "         ----  \n"
-     "---------      \n",
+     "---------      \n"
+     "(fare take per avviare l'enigma)\n",
      "---------------\n"
      "     sesso     \n"
-     "---------------\n",
+     "---------------\n"
+     "(fare take per avviare l'enigma)\n",
      "",
-     true, false, false, false
+     true, false, true, false
     },
     {"scritta_rovinata",
      "L'oggetto ha un enigma, fare take per avviarlo.\n",
@@ -54,7 +56,7 @@ oggetto oggetti_cimitero[] = {
      false, true, false, false
     },
     /* oggetti sbloccabili dalle use */
-    {"torcia UV",
+    {"torcia_UV",
      "blabla\n",
      "blabla",
      false, false, false, true
@@ -66,12 +68,16 @@ oggetto oggetti_cimitero[] = {
     }
 };
 
-utilizzo tabella_utilizzi_cimitero[] = {
-    {"foglietto", "pagina_strappata"},
-    {"torcia UV", "scritta_rovinata"},
-    {"pezzo", "statua"},
-    {"gemma", "scatola", &oggetti_cimitero[6]},
+utilizzo utilizzi_cimitero[] = {
+    {"foglietto", "pagina_strappata", NULL, false},
+    {"torcia_UV", "scritta_rovinata", NULL, true},
+    {"pezzo", "statua", NULL, false},
+    {"gemma", "scatola", &oggetti_cimitero[6], true},
     {"chiave", "lucchetto"}
+};
+
+enigma enigmi_cimitero[] = {
+
 };
 
 locazione locazioni_cimitero[] = {
@@ -105,6 +111,6 @@ scenario scenario_cimitero = {
     N_UTILIZZI_CIMITERO,
     oggetti_cimitero,
     locazioni_cimitero,
-    tabella_utilizzi_cimitero,
+    utilizzi_cimitero,
     N_TOKEN_CIMITERO
 };

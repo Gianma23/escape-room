@@ -34,7 +34,11 @@ char* descrizione_locazione(locazione *loc)
         if(loc->oggetti[i]->is_preso || loc->oggetti[i]->is_nascosto) {
             continue;
         }
+        n_obj++;
         strcat(tmp, loc->oggetti[i]->descrizione_locazione);
+    }
+    if(n_obj == 0) {
+        strcat(tmp, "\n");
     }
     return tmp;
 }
@@ -84,7 +88,7 @@ char* prendi_descrizione(char *opzione)
     }
 
     oggetto *obj = cerca_oggetto(opzione);
-    if(obj != NULL) {
+    if(obj != NULL && !obj->is_nascosto) {
         return obj->is_bloccato ? obj->descrizione_bloccato : obj->descrizione_sbloccato;
     }
 
@@ -209,6 +213,11 @@ char* inizia_scenario(int id_scenario)
     }
     scenario_scelto = id_scenario;
     return "Scenario iniziato, buona fortuna!\n";
+}
+
+int token_rimasti()
+{
+    return scenari[scenario_scelto]->n_token - token;
 }
 
 /* Resetta lo scenario id_scenario ai valori di default */
