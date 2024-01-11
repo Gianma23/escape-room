@@ -32,7 +32,7 @@ char* handler_startgroup(struct sockaddr_in cl_addr, char* opt)
         return "Impossibile creare il gruppo, è già in corso uno scenario.\n";
     }
     if(giocatori.attivo) {
-        return "Gruppo per giocare già creato.";
+        return "Gruppo per giocare già creato.\n";
     }
 
     giocatori.attivo = true;

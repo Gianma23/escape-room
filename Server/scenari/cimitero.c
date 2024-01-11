@@ -7,59 +7,68 @@ oggetto oggetti_cimitero[] = {
      "Sembra che serva una chiave per aprirlo...\n",
      "Il lucchetto è sbloccato adesso.\n",
      "C'è un **lucchetto** che lo blocca.\n",
-     true, true, false
+     true, true, false, false
     },
     {"scatola",
      "Una scatola di metallo arrugginita, serve una chiave per aprirla.\n",
      "Hai aperto la scatola, al suo interno c'è TODO (messo nell'inventario).\n",
      "Ai suoi piedi c'è una **scatola**.\n",
-     false, false, false
+     false, false, false, false
     },
     {"foglietto",
      "NULL",
      "indizio\n",
      "All'interno c'è un **foglietto**.\n",
-     false, false, false
+     false, false, false, false
     },
     {"statua",
      "Una statua di un angelo, ha le mani pronte a ricevere qualcosa.\n",
      "sbloccato\n",
      "Dietro c'è una **statua**.\n",
-     false, false, false
+     false, false, false, false
     },
     {"libro",
      "Il libro è molto vecchio, c'è una **pagina strappata**.\n", 
-     "ora si può leggere la **pagina intera**\n",
+     "ora si può leggere la **pagina strappata**\n",
      "Accanto c'è un **libro**.\n",
-     true, false, false
+     true, false, false, false
+    },
+    {"pagina strappata",
+     "---------------\n"
+     "    | | | |  --\n"
+     "         ----  \n"
+     " --------      \n",
+     "---------------\n"
+     "     sesso     \n"
+     "---------------\n",
+     "",
+     true, false, false, false
     },
     {"scritta rovinata",
      "L'oggetto ha un enigma, fare take per avviarlo.\n",
      "Enigma risolto.\n",
      "Sopra c'è una **scritta rovinata**.\n",
-     false, true, false
+     false, true, false, false
     },
-    /* oggetti nascosti, dati dalle use */
+    /* oggetti sbloccabili dalle use */
     {"torcia UV",
      "blabla\n",
      "blabla",
-     false, false, false
+     false, false, false, true
     },
     {"chiave",
      "blabla\n",
      "blabla",
-     false, false, false
+     false, false, false, true
     }
 };
 
 utilizzo tabella_utilizzi_cimitero[] = {
-    {"chiave", "lucchetto"},
-    {"gemma", "scatola", &oggetti_cimitero[6]},
-    {"libro", "statua"},
+    {"foglietto", "pagina strappata"},
     {"torcia UV", "scritta rovinata"},
     {"pezzo", "statua"},
-    {"torcia", "scritta rovinata"},
-    {"foglietto", "pagina strappata"}
+    {"gemma", "scatola", &oggetti_cimitero[6]},
+    {"chiave", "lucchetto"}
 };
 
 locazione locazioni_cimitero[] = {
@@ -93,5 +102,6 @@ scenario scenario_cimitero = {
     N_UTILIZZI_CIMITERO,
     oggetti_cimitero,
     locazioni_cimitero,
-    tabella_utilizzi_cimitero
+    tabella_utilizzi_cimitero,
+    N_TOKEN_CIMITERO
 };

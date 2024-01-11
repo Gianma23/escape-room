@@ -17,9 +17,11 @@ typedef struct oggetto {
     bool is_preso;
     /* se ha un enigma deve essere risolto prima di prenderlo */
     bool has_enigma;
+    /* se è nascosto non compare nella locazione */
+    bool is_nascosto;
+    /* indirizzo IP di chi prende l'oggetto per verificare se può usarlo con la use
+       (non ci sarebbe questo problema senza multiplayer) */
     struct sockaddr_in addr_possessore;
-    /* TODO: salvare IP di chi prende l'oggetto per verificare se può usarlo con la use
-        (non ci sarebbe questo problema senza multiplayer) */
 } oggetto;
 
 typedef struct locazione {
@@ -44,6 +46,7 @@ typedef struct scenario {
     oggetto *oggetti;
     locazione *locazioni;
     utilizzo *utilizzi;
+    int n_token;
 } scenario;
 
 typedef struct gruppo {

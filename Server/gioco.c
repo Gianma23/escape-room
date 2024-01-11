@@ -4,6 +4,7 @@
 #include "scenari/cimitero.h"
 
 static int scenario_scelto = -1;
+static int token = 0;
 
 static scenario *scenari[] = {
     &scenario_cimitero
@@ -29,12 +30,29 @@ char* descrizione_locazione(locazione *loc)
     }
 
     for(i = 0; i < loc->n_oggetti; i++) {
-        if(loc->oggetti[i]->is_preso) {
+        if(loc->oggetti[i]->is_preso || loc->oggetti[i]->is_nascosto) {
             continue;
         }
         strcat(tmp, loc->oggetti[i]->descrizione_locazione);
     }
     return tmp;
+}
+
+oggetto* cerca_oggetto(char* obj)
+{
+    int i;
+    scenario *scen = scenari[scenario_scelto];
+    for(i = 0; i < scen->n_oggetti; i++) {
+        if(strcmp(obj, scen->oggetti[i].nome) == 0) {
+            return &scen->oggetti[i];
+        }
+    }
+    return NULL;
+}
+
+bool is_game_ended()
+{
+    return token == scenari[scenario_scelto]->n_token;
 }
 
 /* IMPLEMENTAZIONE FUNZIONI HEADER ============= */
@@ -63,14 +81,12 @@ char* prendi_descrizione(char *opzione)
     if(opzione == NULL) {
         return scen->descrizione;
     }
-    printf("%d\n", scen->n_oggetti);
-    for(i = 0; i < scen->n_oggetti; i++) {
-        oggetto *obj = &scen->oggetti[i]; 
-        if(strcmp(opzione, obj->nome) == 0) {
-            return obj->is_bloccato ? obj->descrizione_bloccato : obj->descrizione_sbloccato;
-        }
+
+    oggetto *obj = cerca_oggetto(opzione);
+    if(obj != NULL) {
+        return obj->is_bloccato ? obj->descrizione_bloccato : obj->descrizione_sbloccato;
     }
-    printf("ciao\n");
+
     for(i = 0; i < scen->n_locazioni; i++) {
         if(strcmp(opzione, scen->locazioni[i].nome) == 0) {
             return descrizione_locazione(&scen->locazioni[i]);
@@ -94,9 +110,9 @@ char* prendi_oggetto(struct sockaddr_in addr, char *nome_obj)
         if(strcmp(nome_obj, obj->nome) != 0) {
             continue;
         }
-        /* if(obj->is_bloccato) {
-            return "Oggetto bloccato!\n";
-        } */
+        if(obj->is_bloccato) {
+            return "Non puoi prendere questo oggetto!\n";
+        }
         if(obj->is_preso) {
             return "Oggetto già preso!\n";
         }
@@ -120,29 +136,42 @@ char* prendi_oggetto(struct sockaddr_in addr, char *nome_obj)
 char* utilizza_oggetti(struct sockaddr_in addr, char *nome_obj1, char *nome_obj2)
 {
     int i;
-    oggetto *obj = NULL;
     scenario *scen = scenari[scenario_scelto];
     static char ret[256];
-    for(i = 0; i < scen->n_oggetti; i++) {
-        if(strcmp(nome_obj1, scen->oggetti[i].nome) != 0) {
-            obj = &scen->oggetti[i]; 
-            break;
-        }
-    }
+
+    oggetto *obj = cerca_oggetto(nome_obj2);
     if(obj == NULL) {
-        return "Oggetto non trovato.\n";
+        return "Oggetto2 non trovato.\n";
+    }
+    obj = cerca_oggetto(nome_obj1);
+    if(obj == NULL) {
+        return "Oggetto1 non trovato.\n";
     }
     if(!obj->is_preso) {
-        return "Non hai questo oggetto nel tuo inventario.\n";
+        return "Non hai oggetto1 nel tuo inventario.\n";
     }
     if(!compara_addr(&addr, &obj->addr_possessore)) {
-        return "L'altro giocatore ha l'oggetto.\n";
+        return "L'altro giocatore ha oggetto1.\n";
     }
     
     for(i = 0; i < scen->n_utilizzi; i++) {
         utilizzo *util = &scen->utilizzi[i];
         if(strcmp(nome_obj1, util->primo) == 0 && strcmp(nome_obj2, util->secondo) == 0) {
-            util->oggetto_nascosto->is_bloccato = false;
+            /* sblocco l'oggetto nascosto se devo */
+            if(util->oggetto_nascosto != NULL) {
+                util->oggetto_nascosto->is_bloccato = false;
+                util->oggetto_nascosto->is_nascosto = false;
+            }
+            /* blocco oggetto1 */
+            obj->is_bloccato = true;
+            obj->is_nascosto = true;
+            obj->is_preso = false;
+            memset(&obj->addr_possessore, 0, sizeof(obj->addr_possessore));
+            /* assegno un token e guardo se la partita è finita */
+            token++;
+            if(is_game_ended()) {
+                /* TODO vittoria, resetta il gioco */
+            }
             sprintf(ret, "Oggetto %s usato su %s con successo!\n", nome_obj1, nome_obj2);
             return ret;
         }
