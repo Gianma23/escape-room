@@ -193,8 +193,8 @@ static const comando lista_comandi_client[] = {
     {"take", handler_take, "<oggetto>\t\t\tprende l'oggetto se non bloccato"},
     {"drop", handler_drop, "<oggetto>\t\t\tlascia l'oggetto se nell'inventario"},
     {"use", handler_use, "<oggetto1> <oggetto2>\tutilizza l'oggetto1 su oggetto2"},
-    {"objs", handler_objs, "\t\tmostra il tuo inventario"},
-    {"end", handler_end, "\t\t\ttermina la partita. Se è avviato un gruppo termina per tutti"}
+    {"objs", handler_objs, "\t\t\t\tmostra il tuo inventario"},
+    {"end", handler_end, "\t\t\t\ttermina la partita. Se è avviato un gruppo termina per tutti"}
 };
 
 static const comando lista_comandi_server[] = {

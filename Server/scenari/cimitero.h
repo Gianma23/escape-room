@@ -6,7 +6,7 @@
 #define N_OGGETTI_CIMITERO 6
 #define N_LOCAZIONI_CIMITERO 6
 #define N_UTILIZZI_CIMITERO 5
-#define N_TOKEN_CIMITERO 4
+#define N_TOKEN_CIMITERO 5
 
 extern oggetto oggetti_cimitero[];
 extern locazione locazioni_cimitero[];

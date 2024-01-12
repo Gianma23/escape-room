@@ -115,14 +115,14 @@ char* prendi_oggetto(struct sockaddr_in addr, char *nome_obj)
         if(strcmp(nome_obj, obj->nome) != 0) {
             continue;
         }
+        if(obj->has_enigma) {
+        /* TODO: se c'è enigma attivarlo */
+        }
         if(obj->is_bloccato) {
             return "Non puoi prendere questo oggetto!\n";
         }
         if(obj->is_preso) {
             return "Oggetto già preso!\n";
-        }
-        if(obj->has_enigma) {
-        /* TODO: se c'è enigma attivarlo */
         }
 
         obj->is_preso = true;

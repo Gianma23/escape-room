@@ -7,20 +7,20 @@ oggetto oggetti_cimitero[] = {
      "Sembra che serva una chiave per aprirlo...\n",
      "Il lucchetto è sbloccato adesso.\n",
      "C'è un **lucchetto** che lo blocca.\n",
-     true, true, false, false
+     true, false, false, false
     },
     {"scatola",
-     "Una scatola di metallo arrugginita, serve una chiave per aprirla.\n",
-     "Hai aperto la scatola, al suo interno c'è TODO (messo nell'inventario).\n",
+     "Una scatola di metallo arrugginita, c'è un buco a forma di triangolo sopra.\n",
+     "La scatola è aperta, al suo interno c'è una **chiave**.\n",
      "Ai suoi piedi c'è una **scatola**.\n",
      false, false, false, false
     },
     {"foglietto",
      "",
-     "---------      \n",
+     "---------      \n"
      "         ----  \n"
      "    | | | |  --\n"
-     "---------------\n"
+     "---------------\n",
      "All'interno c'è un **foglietto**.\n",
      false, false, false, false
     },
@@ -82,17 +82,33 @@ oggetto oggetti_cimitero[] = {
     }
 };
 
-/* TODO: aggiungere messaggio unico di utilizzo */
 utilizzo utilizzi_cimitero[] = {
-    {"foglietto", "pagina_strappata", NULL, false},
-    {"torcia_UV", "scritta_rovinata", NULL, true},
-    {"spada", "statua", NULL, false},
-    {"gemma", "scatola", &oggetti_cimitero[6], true},
-    {"chiave", "lucchetto"}
+    {"foglietto", "pagina_strappata",
+     "I due pezzi combaciano, ora puoi leggere la pagina completa.\n",
+     NULL, false
+    },
+    {"torcia_UV", "scritta_rovinata",
+     "La torcia ha rivelato le lettere mancanti, ora puoi leggere la scritta completa.\n",
+     NULL, false
+    },
+    {"spada", "statua", 
+     "Posi la spada sulle mani della statua. Si apre un vano ai suoi piedi.\n",
+     NULL, true
+    },
+    {"gemma", "scatola",
+     "La gemma si incastra perfettamente nel buco nella scatola, sembra che si sia aperta.\n",
+     &oggetti_cimitero[6], true
+    },
+    {"chiave", "lucchetto",
+     "Il lucchetto si è aperto!\n",
+      NULL, true
+    }
 };
 
+/* TODO finire enigmi */
 enigma enigmi_cimitero[] = {
-
+    {"", "risposta", false}, /* enigma libro */
+    {"", "risposta", false} /* enigma scritta rovinata */
 };
 
 locazione locazioni_cimitero[] = {
@@ -103,7 +119,7 @@ locazione locazioni_cimitero[] = {
      "L'albero è secco e nodoso. Nel suo tronco vedi un ++buco++. ",
      1, {&oggetti_cimitero[1]}},
     {"buco",
-     "Riesci a malapena a vedere cosa ci sia. ",
+     "Riesci a malapena a vedere cosa ci sia dentro. ",
      1, {&oggetti_cimitero[2]}},
     {"chiesa",
      "La chiesa all'interno è tetra e fai fatica a vedere. Intravedi un ++altare++. ",

@@ -12,6 +12,7 @@
 #define SERVER_PORT 4242
 #define BUFFER_DIM 1024
 #define COMANDO_DIM 64
+#define DIVISORE "======================================================\n"
 
 int main(int argc, char *argv[])
 {
@@ -34,15 +35,15 @@ int main(int argc, char *argv[])
         exit(1);
     }
     
-    printf("======================================================\n");
+    printf(DIVISORE);
     memset(buffer, 0, sizeof(buffer));
     ricevi_messaggio(cl_sock, buffer, "errore");
     printf("%s", buffer);
-    printf("======================================================\n");
+    printf(DIVISORE);
     memset(buffer, 0, sizeof(buffer));
     ricevi_messaggio(cl_sock, buffer, "errore");
     printf("%s", buffer);
-    printf("======================================================\n");
+    printf(DIVISORE);
 
     for(;;) {
         memset(buffer, 0, sizeof(buffer));
@@ -54,5 +55,6 @@ int main(int argc, char *argv[])
         memset(buffer, 0, sizeof(buffer));
         ricevi_messaggio(cl_sock, buffer, "Errore in fase di ricezione");
         printf("%s", buffer);
+        printf(DIVISORE);
     } 
 }

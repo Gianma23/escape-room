@@ -34,12 +34,15 @@ typedef struct locazione {
 typedef struct utilizzo {
     char *primo;
     char *secondo;
+    char *messaggio;
     oggetto *oggetto_nascosto;
     bool has_token;
 } utilizzo;
 
 typedef struct enigma {
-
+    char *descrizione;
+    char *soluzione;
+    bool is_risolto;
 } enigma;
 
 typedef struct scenario {
