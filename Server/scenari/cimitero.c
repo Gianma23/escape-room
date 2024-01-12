@@ -2,18 +2,24 @@
 #include "../../utility.h"
 #include "cimitero.h"
 
+/* TODO finire enigmi */
+enigma enigmi_cimitero[] = {
+    {"Indovina la parola scritta sulla pagina:\n", "risposta", false}, /* enigma libro */
+    {"", "risposta", false} /* enigma scritta rovinata */
+};
+
 oggetto oggetti_cimitero[] = {
     {"lucchetto", 
      "Sembra che serva una chiave per aprirlo...\n",
      "Il lucchetto è sbloccato adesso.\n",
      "C'è un **lucchetto** che lo blocca.\n",
-     true, false, false, false
+     true, false, false, NULL
     },
     {"scatola",
      "Una scatola di metallo arrugginita, c'è un buco a forma di triangolo sopra.\n",
      "La scatola è aperta, al suo interno c'è una **chiave**.\n",
      "Ai suoi piedi c'è una **scatola**.\n",
-     false, false, false, false
+     false, false, false, NULL
     },
     {"foglietto",
      "",
@@ -22,19 +28,19 @@ oggetto oggetti_cimitero[] = {
      "    | | | |  --\n"
      "---------------\n",
      "All'interno c'è un **foglietto**.\n",
-     false, false, false, false
+     false, false, false, NULL
     },
     {"statua",
      "Una statua di un angelo, ha le mani pronte a ricevere qualcosa.\n",
      "Ai piedi della statua si è aperto un vano con una **gemma** dentro.\n",
      "Dietro c'è una **statua**.\n",
-     false, false, false, false
+     false, false, false, NULL
     },
     {"libro",
      "", 
      "Il libro è molto vecchio, c'è una **pagina_strappata**.\n",
      "Accanto c'è un **libro**.\n",
-     false, false, false, false
+     false, false, false, NULL
     },
     {"pagina_strappata",
      "---------------\n"
@@ -47,38 +53,38 @@ oggetto oggetti_cimitero[] = {
      "---------------\n"
      "(fare take per avviare l'enigma)\n",
      "",
-     true, false, true, false
+     true, false, true, &enigmi_cimitero[0]
     },
     {"scritta_rovinata",
      "L'oggetto ha un enigma, fare take per avviarlo.\n",
      "Enigma risolto.\n",
      "Sopra c'è una **scritta_rovinata**.\n",
-     false, true, false, false
+     false, true, false, &enigmi_cimitero[1]
     },
     /* oggetti sbloccabili dalle use */
     {"torcia_UV",
      "",
      "Una torcia a raggi UV. È in grado di rivelare scritte nascoste.\n",
      "",
-     false, false, false, true
+     false, false, true, NULL
     },
     {"spada",
      "",
      "una spada lucente\n",
      "",
-     false, false, false, true
+     false, false, true, NULL
     },
     {"gemma",
      "",
      "Una gemma rossa di forma triangolare.\n",
      "",
-     false, false, false, true
+     false, false, true, NULL
     },
     {"chiave",
      "",
      "blabla",
      "",
-     false, false, false, true
+     false, false, true, NULL
     }
 };
 
@@ -103,12 +109,6 @@ utilizzo utilizzi_cimitero[] = {
      "Il lucchetto si è aperto!\n",
       NULL, true
     }
-};
-
-/* TODO finire enigmi */
-enigma enigmi_cimitero[] = {
-    {"", "risposta", false}, /* enigma libro */
-    {"", "risposta", false} /* enigma scritta rovinata */
 };
 
 locazione locazioni_cimitero[] = {

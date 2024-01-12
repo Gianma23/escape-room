@@ -7,6 +7,11 @@
 #define MAX_GIOCATORI_GRUPPO 2
 #define N_SCENARI 1
 
+typedef struct enigma {
+    char *descrizione;
+    char *soluzione;
+    bool is_risolto;
+} enigma;
 typedef struct oggetto {
     char *nome;
     char *descrizione_bloccato;
@@ -15,10 +20,10 @@ typedef struct oggetto {
     /* se è bloccato non può essere preso */
     bool is_bloccato;
     bool is_preso;
-    /* se ha un enigma deve essere risolto prima di prenderlo */
-    bool has_enigma;
     /* se è nascosto non compare nella locazione */
     bool is_nascosto;
+    /* se ha un enigma deve essere attivato con la take */
+    enigma *enigma;
     /* indirizzo IP di chi prende l'oggetto per verificare se può usarlo con la use
        (non ci sarebbe questo problema senza multiplayer) */
     struct sockaddr_in addr_possessore;
@@ -39,11 +44,6 @@ typedef struct utilizzo {
     bool has_token;
 } utilizzo;
 
-typedef struct enigma {
-    char *descrizione;
-    char *soluzione;
-    bool is_risolto;
-} enigma;
 
 typedef struct scenario {
     char *nome;

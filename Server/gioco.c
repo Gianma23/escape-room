@@ -4,6 +4,7 @@
 #include "scenari/cimitero.h"
 
 static int scenario_scelto = -1;
+static enigma *enigma_attivato = NULL;
 static int token = 0;
 
 static scenario *scenari[] = {
@@ -12,7 +13,7 @@ static scenario *scenari[] = {
     includendo la loro interfaccia */
 };
 
-/* FUNZIONI DI UTILITÀ ==================== */
+/* ==================== FUNZIONI DI UTILITÀ ==================== */
 
 /*  loc: locazione della quale va ritornata la descrizione
     buffer: buffer nel quale ritornare la descrizione
@@ -55,12 +56,24 @@ oggetto* cerca_oggetto(char* obj)
     return NULL;
 }
 
+void attiva_enigma(oggetto *obj)
+{
+    /* TODO finire */
+    enigma_attivato = obj->enigma;
+
+    static char tmp[512] = "Enigma attivato!\n";
+    strcat(tmp, obj->enigma->descrizione);
+    strcat(tmp, obj->is_bloccato ? obj->descrizione_bloccato : obj->descrizione_sbloccato);
+    strcat(tmp, "\n");
+    return tmp;
+}
+
 bool is_game_ended()
 {
     return token == scenari[scenario_scelto]->n_token;
 }
 
-/* IMPLEMENTAZIONE FUNZIONI HEADER ============= */
+/* ============= IMPLEMENTAZIONE FUNZIONI HEADER ============= */
 
 /*  buf: buffer nel quale scrivere.
     Ritorna gli scenari disponibili */
@@ -107,29 +120,24 @@ char* prendi_descrizione(char *opzione)
     già preso. Se l'oggetto ha un enigma viene attivato. */
 char* prendi_oggetto(struct sockaddr_in addr, char *nome_obj)
 {
-    int i;
-    oggetto *obj;
-    scenario *scen = scenari[scenario_scelto];
-    for(i = 0; i < scen->n_oggetti; i++) {
-        obj = &scen->oggetti[i]; 
-        if(strcmp(nome_obj, obj->nome) != 0) {
-            continue;
-        }
-        if(obj->has_enigma) {
-        /* TODO: se c'è enigma attivarlo */
-        }
-        if(obj->is_bloccato) {
-            return "Non puoi prendere questo oggetto!\n";
-        }
-        if(obj->is_preso) {
-            return "Oggetto già preso!\n";
-        }
-
-        obj->is_preso = true;
-        obj->addr_possessore = addr;
-        return "Oggetto raccolto!\n";
-    }
+    oggetto *obj = cerca_oggetto(nome_obj);
+    if(obj == NULL) {
     return "Oggetto non trovato.\n";
+    }
+
+    if(obj->enigma != NULL) {
+        attiva_enigma(obj);
+    }
+    if(obj->is_bloccato) {
+        return "Non puoi prendere questo oggetto!\n";
+    }
+    if(obj->is_preso) {
+        return "Oggetto già preso!\n";
+    }
+
+    obj->is_preso = true;
+    obj->addr_possessore = addr;
+    return "Oggetto raccolto!\n";
 }
 
 /*  addr: indirizzo del giocatore

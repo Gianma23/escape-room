@@ -253,7 +253,7 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
             return;
         }
     }   
-    /* TODO: riconoscimento comando simile */
+    handler_risolvi_enigma(cl_addr, opt);
     printf("comando non trovato.\n");
     invia_messaggio(socket, "comando non trovato.\n", "Errore invio risposta comando non trovato");
 }
