@@ -127,7 +127,7 @@ char* prendi_oggetto(struct sockaddr_in addr, char *nome_obj)
     return "Oggetto non trovato.\n";
     }
 
-    if(obj->enigma != NULL) {
+    if(obj->enigma != NULL && !obj->enigma->is_risolto) {
         return attiva_enigma(obj, &addr);
     }
     if(obj->is_bloccato) {
@@ -229,18 +229,22 @@ char* inizia_scenario(int id_scenario)
     ATTENZIONE: non controlla se c'è un enigma realmente attivo */
 char* risolvi_enigma(char *risposta)
 {
-    if(strcmp(risposta, enigma_attivato->soluzione) == 0) {
-        return "Soluzione errata.\n";
+    static char tmp[32];
+    if(strcmp(risposta, enigma_attivato->soluzione) != 0) {
+        strcpy(tmp, "Soluzione errata.\n");
     }
-    /* Soluzione corretta, il giocatore riceve un token */
-    enigma_attivato->is_risolto = true;
+    /* Soluzione corretta */
+    else {
+        enigma_attivato->is_risolto = true;
+        token++;
+        if(is_game_ended()) {
+            /* TODO vittoria, resetta il gioco */
+        }
+        strcpy(tmp, enigma_attivato->messaggio_risoluzione);
+    }
     enigma_attivato = NULL;
     giocatore_enigma_attivato = NULL;
-    token++;
-    if(is_game_ended()) {
-        /* TODO vittoria, resetta il gioco */
-    }
-    return "Soluzione corretta!\n";
+    return tmp;
 }
 
 int token_rimasti()

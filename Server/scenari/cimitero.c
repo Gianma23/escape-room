@@ -23,7 +23,7 @@ oggetto oggetti_cimitero[] = {
      "Una scatola di metallo arrugginita, c'è un buco a forma di triangolo sopra.\n",
      "La scatola è aperta, al suo interno c'è una **chiave**.\n",
      "Ai suoi piedi c'è una **scatola**.\n",
-     false, false, false, NULL
+     true, false, false, NULL
     },
     {"foglietto",
      "",
@@ -38,26 +38,24 @@ oggetto oggetti_cimitero[] = {
      "Una statua di un angelo, ha le mani pronte a ricevere qualcosa.\n",
      "Ai piedi della statua si è aperto un vano con una **gemma** dentro.\n",
      "Dietro c'è una **statua**.\n",
-     false, false, false, NULL
+     true, false, false, NULL
     },
     {"libro",
      "", 
      "Il libro è molto vecchio, c'è una **pagina_strappata**.\n",
      "Accanto c'è un **libro**.\n",
-     false, false, false, NULL
+     true, false, false, NULL
     },
     {"pagina_strappata",
      "---------------\n"
      "    | | | |  --\n"
      "         ----  \n"
-     "---------      \n"
-     "(fare take per avviare l'enigma)\n",
+     "---------      \n",
      "---------------\n"
      "     sesso     \n"
-     "---------------\n"
-     "(fare take per avviare l'enigma)\n",
+     "---------------\n",
      "",
-     true, false, true, &enigmi_cimitero[0]
+     true, false, false, &enigmi_cimitero[0]
     },
     {"scritta_rovinata",
      "L'oggetto ha un enigma, fare take per avviarlo.\n",
@@ -130,10 +128,10 @@ locazione locazioni_cimitero[] = {
      1, {&oggetti_cimitero[3]}},
     {"altare",
      "L'altare è illuminato da una fioca luce. ",
-     1, {&oggetti_cimitero[4]}},
+     2, {&oggetti_cimitero[4], &oggetti_cimitero[7]}},
     {"tomba",
      "La tomba è malcurata e cade a pezzi. ",
-     1, {&oggetti_cimitero[5]}},
+     1, {&oggetti_cimitero[5]} /* TODO mettere spada */},
 };
 
 scenario scenario_cimitero = {
