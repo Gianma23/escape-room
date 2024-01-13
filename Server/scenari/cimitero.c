@@ -4,7 +4,7 @@
 
 /* TODO finire enigmi */
 enigma enigmi_cimitero[] = {
-    {"Indovina la parola scritta sulla pagina:\n", "risposta", false, /* enigma libro */
+    {"Indovina la parola scritta sulla pagina:\n", "crepuscolo", false, /* enigma libro */
      "Hai indovinato la parola! Sull'altare si è aperto un cassetto.\n",
      &oggetti_cimitero[7]}, 
     {"Indovinello?", "risposta", false, /* enigma scritta rovinata */
@@ -27,10 +27,10 @@ oggetto oggetti_cimitero[] = {
     },
     {"foglietto",
      "",
-     "---------      \n"
-     "         ----  \n"
-     "    | | | |  --\n"
-     "---------------\n",
+     "-----------\n"
+     " -       - \n"
+     "  -p*sc*-  \n"
+     "   -----   \n",
      "All'interno c'è un **foglietto**.\n",
      false, false, false, NULL
     },
@@ -47,13 +47,18 @@ oggetto oggetti_cimitero[] = {
      true, false, false, NULL
     },
     {"pagina_strappata",
-     "---------------\n"
-     "    | | | |  --\n"
-     "         ----  \n"
-     "---------      \n",
-     "---------------\n"
-     "     sesso     \n"
-     "---------------\n",
+     "|------         ---|\n"
+     "|      --    ---   |\n"
+     "|    cr*--  -lo    |\n"
+     "|         --       |\n"
+     "|          -       |\n"
+     "|------------------|\n",
+     "|------------------|\n"
+     "|                  |\n"
+     "|    cr*puscolo    |\n"
+     "|                  |\n"
+     "|                  |\n"
+     "|------------------|\n",
      "",
      true, false, false, &enigmi_cimitero[0]
     },
