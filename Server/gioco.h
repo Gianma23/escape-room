@@ -7,10 +7,13 @@
 #define MAX_GIOCATORI_GRUPPO 2
 #define N_SCENARI 1
 
+typedef struct oggetto oggetto;
 typedef struct enigma {
     char *descrizione;
     char *soluzione;
     bool is_risolto;
+    char *messaggio_risoluzione;
+    oggetto *oggetto_nascosto;
 } enigma;
 typedef struct oggetto {
     char *nome;
@@ -28,14 +31,12 @@ typedef struct oggetto {
        (non ci sarebbe questo problema senza multiplayer) */
     struct sockaddr_in addr_possessore;
 } oggetto;
-
 typedef struct locazione {
     char *nome;
     char *descrizione_iniziale;
     int n_oggetti;
     oggetto *oggetti[MAX_OGGETTI_LOCAZIONE];
 } locazione;
-
 typedef struct utilizzo {
     char *primo;
     char *secondo;
@@ -43,8 +44,6 @@ typedef struct utilizzo {
     oggetto *oggetto_nascosto;
     bool has_token;
 } utilizzo;
-
-
 typedef struct scenario {
     char *nome;
     char *descrizione;
@@ -56,7 +55,6 @@ typedef struct scenario {
     utilizzo *utilizzi;
     int n_token;
 } scenario;
-
 typedef struct gruppo {
     bool attivo;
     int num_giocatori;
@@ -69,8 +67,10 @@ char* prendi_descrizione(char *);
 char* prendi_inventario(struct sockaddr_in);
 char* prendi_oggetto(struct sockaddr_in, char *);
 char* utilizza_oggetti(struct sockaddr_in, char *, char *);
+char* risolvi_enigma(char *);
 int token_rimasti();
 bool reset_scenario(int);
 bool is_game_started();
+bool is_risposta_enigma(struct sockaddr_in);
 
 #endif

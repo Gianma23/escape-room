@@ -66,7 +66,10 @@ void print_addr(struct sockaddr_in *addr)
 bool compara_addr(struct sockaddr_in *addr1, struct sockaddr_in *addr2)
 {
     /* debug */
-/*     print_addr(&addr1);
-    print_addr(&addr2); */
+    /* if(addr1 == NULL || addr2 == NULL) {
+        return false;
+    } */
+    print_addr(addr1);
+    print_addr(addr2);
     return addr1->sin_addr.s_addr == addr2->sin_addr.s_addr && addr1->sin_port == addr2->sin_port;
 }

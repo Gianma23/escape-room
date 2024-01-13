@@ -217,8 +217,14 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
     char *opt;
     char *com;
     char risposta[1024];
-    const comando *lista_comandi = strcmp(soggetto, "server") == 0 ? lista_comandi_server : lista_comandi_client;
     const int N_COMANDI = strcmp(soggetto, "server") == 0 ? N_COMANDI_SERVER : N_COMANDI_CLIENT;
+    const comando *lista_comandi = strcmp(soggetto, "server") == 0 ? lista_comandi_server : lista_comandi_client;
+    
+    /* prendo indirizzo del client */
+    struct sockaddr_in cl_addr;
+    socklen_t len = sizeof(cl_addr);
+    memset(&cl_addr, 0, sizeof(cl_addr));
+    getpeername(socket, (struct sockaddr*)&cl_addr, &len);
     
     /* cerco il comando nella lista dei comandi */
     com = strtok(buffer, " ");
@@ -231,12 +237,6 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
                 opt = buffer;
                 *opt = '\0';
             }
-            /* prendo indirizzo del client */
-            struct sockaddr_in cl_addr;
-            socklen_t len = sizeof(cl_addr);
-            memset(&cl_addr, 0, sizeof(cl_addr));
-            getpeername(socket, (struct sockaddr*)&cl_addr, &len);
-
             memset(risposta, 0, sizeof(risposta));
 
             if(is_game_started() && (time = remaining_time()) <= 0) {
@@ -253,7 +253,13 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
             return;
         }
     }   
-    handler_risolvi_enigma(cl_addr, opt);
+    /* se un comando non è stato trovato potrebbe essere la risposta ad un enigma */
+    if(is_risposta_enigma(cl_addr)) {
+        com = strtok(buffer, "\n");
+        strcat(risposta, risolvi_enigma(com));
+        invia_messaggio(socket, risposta, "Errore invio risposta enigma");
+        return;
+    }
     printf("comando non trovato.\n");
     invia_messaggio(socket, "comando non trovato.\n", "Errore invio risposta comando non trovato");
 }

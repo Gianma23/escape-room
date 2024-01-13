@@ -4,8 +4,12 @@
 
 /* TODO finire enigmi */
 enigma enigmi_cimitero[] = {
-    {"Indovina la parola scritta sulla pagina:\n", "risposta", false}, /* enigma libro */
-    {"", "risposta", false} /* enigma scritta rovinata */
+    {"Indovina la parola scritta sulla pagina:\n", "risposta", false, /* enigma libro */
+     "Hai indovinato la parola! Sull'altare si è aperto un cassetto.\n",
+     &oggetti_cimitero[7]}, 
+    {"Indovinello?", "risposta", false, /* enigma scritta rovinata */
+     "a",
+     &oggetti_cimitero[8]} 
 };
 
 oggetto oggetti_cimitero[] = {
@@ -65,7 +69,7 @@ oggetto oggetti_cimitero[] = {
     {"torcia_UV",
      "",
      "Una torcia a raggi UV. È in grado di rivelare scritte nascoste.\n",
-     "",
+     "C'è un cassetto aperto, all'interno c'è una **torcia_UV**.\n",
      false, false, true, NULL
     },
     {"spada",

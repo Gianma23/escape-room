@@ -5,6 +5,7 @@
 
 static int scenario_scelto = -1;
 static enigma *enigma_attivato = NULL;
+static struct sockaddr_in *giocatore_enigma_attivato = NULL;
 static int token = 0;
 
 static scenario *scenari[] = {
@@ -56,10 +57,11 @@ oggetto* cerca_oggetto(char* obj)
     return NULL;
 }
 
-void attiva_enigma(oggetto *obj)
+char* attiva_enigma(oggetto *obj, struct sockaddr_in *addr)
 {
     /* TODO finire */
     enigma_attivato = obj->enigma;
+    giocatore_enigma_attivato = addr;
 
     static char tmp[512] = "Enigma attivato!\n";
     strcat(tmp, obj->enigma->descrizione);
@@ -126,7 +128,7 @@ char* prendi_oggetto(struct sockaddr_in addr, char *nome_obj)
     }
 
     if(obj->enigma != NULL) {
-        attiva_enigma(obj);
+        return attiva_enigma(obj, &addr);
     }
     if(obj->is_bloccato) {
         return "Non puoi prendere questo oggetto!\n";
@@ -179,7 +181,7 @@ char* utilizza_oggetti(struct sockaddr_in addr, char *nome_obj1, char *nome_obj2
             obj1->is_bloccato = true;
             obj1->is_nascosto = true;
             obj1->is_preso = false;
-            memset(&obj1->addr_possessore, 0, sizeof(obj1->addr_possessore));
+            memset(&obj1->addr_possessore, 0, sizeof(struct sockaddr_in));
             /* sblocco oggetto2 */
             obj2->is_bloccato = false;
             /* assegno un token e guardo se la partita è finita */
@@ -187,7 +189,7 @@ char* utilizza_oggetti(struct sockaddr_in addr, char *nome_obj1, char *nome_obj2
             if(is_game_ended()) {
                 /* TODO vittoria, resetta il gioco */
             }
-            sprintf(ret, "Oggetto %s usato su %s con successo!\n", nome_obj1, nome_obj2);
+            strcat(ret, util->messaggio);
             return ret;
         }
     }
@@ -198,7 +200,7 @@ char* prendi_inventario(struct sockaddr_in addr)
 {
     int i;
     scenario *scen = scenari[scenario_scelto];
-    static char ret[1024];
+    static char ret[256];
     
     memset(ret, 0, sizeof(ret));
     strcat(ret, "Inventario:\n");
@@ -223,6 +225,24 @@ char* inizia_scenario(int id_scenario)
     return "Scenario iniziato, buona fortuna!\n";
 }
 
+/*  risposta: risposta che ha dato il giocatore all'enigma
+    ATTENZIONE: non controlla se c'è un enigma realmente attivo */
+char* risolvi_enigma(char *risposta)
+{
+    if(strcmp(risposta, enigma_attivato->soluzione) == 0) {
+        return "Soluzione errata.\n";
+    }
+    /* Soluzione corretta, il giocatore riceve un token */
+    enigma_attivato->is_risolto = true;
+    enigma_attivato = NULL;
+    giocatore_enigma_attivato = NULL;
+    token++;
+    if(is_game_ended()) {
+        /* TODO vittoria, resetta il gioco */
+    }
+    return "Soluzione corretta!\n";
+}
+
 int token_rimasti()
 {
     return scenari[scenario_scelto]->n_token - token;
@@ -237,6 +257,11 @@ bool reset_scenario(int id_scenario)
     /* TODO:  resettare per ogni oggetto le impostazioni di default */
     scenario_scelto = -1;
     return true;
+}
+
+bool is_risposta_enigma(struct sockaddr_in addr)
+{
+    return enigma_attivato != NULL && compara_addr(&addr, giocatore_enigma_attivato);
 }
 
 /* Ritorna true se è stato scelto uno scenario e dunque è in corso una partita */
