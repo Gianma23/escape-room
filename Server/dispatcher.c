@@ -227,6 +227,7 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
     memset(&cl_addr, 0, sizeof(cl_addr));
     getpeername(socket, (struct sockaddr*)&cl_addr, &len);
     
+    /* TODO rivedere controllo se enigma è attivo, contando il multiplayer */
     /* se il comando è arrivato da un giocatore con un enigma attivo, 
        l'input deve essere visto come la risposta all'enigma */
     if(is_risposta_enigma(cl_addr)) {

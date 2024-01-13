@@ -8,7 +8,7 @@ enigma enigmi_cimitero[] = {
      "Hai indovinato la parola! Sull'altare si è aperto un cassetto.\n",
      &oggetti_cimitero[7]}, 
     {"Indovinello?", "risposta", false, /* enigma scritta rovinata */
-     "a",
+     "Bravo, hai indovinato! La terra si smuove e vedi qualcosa sbucare dalla tomba.\n",
      &oggetti_cimitero[8]} 
 };
 
@@ -55,7 +55,7 @@ oggetto oggetti_cimitero[] = {
      "|------------------|\n",
      "|------------------|\n"
      "|                  |\n"
-     "|    cr*puscolo    |\n"
+     "|    cr*p*sc*lo    |\n"
      "|                  |\n"
      "|                  |\n"
      "|------------------|\n",
@@ -77,8 +77,8 @@ oggetto oggetti_cimitero[] = {
     },
     {"spada",
      "",
-     "una spada lucente\n",
-     "",
+     "Una spada lucente, è molto pesante.\n",
+     "Dalla terra spunta il manico di una **spada**.\n",
      false, false, true, NULL
     },
     {"gemma",
@@ -89,7 +89,7 @@ oggetto oggetti_cimitero[] = {
     },
     {"chiave",
      "",
-     "blabla",
+     "Una chiave argentata.\n",
      "",
      false, false, true, NULL
     }

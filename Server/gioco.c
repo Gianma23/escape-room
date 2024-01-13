@@ -66,7 +66,6 @@ char* attiva_enigma(oggetto *obj, struct sockaddr_in *addr)
     static char tmp[512] = "Enigma attivato!\n";
     strcat(tmp, obj->enigma->descrizione);
     strcat(tmp, obj->is_bloccato ? obj->descrizione_bloccato : obj->descrizione_sbloccato);
-    strcat(tmp, "\n");
     return tmp;
 }
 
@@ -85,7 +84,7 @@ void prendi_scenari(char *buf)
     strcpy(buf, "Scenari disponibili:\n");
     char tmp[1024];
     for(i = 0; i < N_SCENARI; i++) {
-        sprintf(tmp, "%d:%s\n", i, scenari[i]->nome);
+        sprintf(tmp, "%d: %s. Presenti %d token.\n", i, scenari[i]->nome, scenari[i]->n_token);
         strcat(buf, tmp);
     }
 }
@@ -235,6 +234,7 @@ char* risolvi_enigma(char *risposta)
     }
     /* Soluzione corretta */
     else {
+        enigma_attivato->oggetto_nascosto->is_nascosto = false;
         enigma_attivato->is_risolto = true;
         token++;
         if(is_game_ended()) {
