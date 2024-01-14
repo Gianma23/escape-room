@@ -8,10 +8,6 @@
 #define N_UTILIZZI_CIMITERO 5
 #define N_TOKEN_CIMITERO 5
 
-extern oggetto oggetti_cimitero[];
-extern locazione locazioni_cimitero[];
-extern utilizzo utilizzi_cimitero[];
-extern enigma enigmi_cimitero[];
 extern scenario scenario_cimitero;
 
 #endif

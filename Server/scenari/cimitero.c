@@ -2,12 +2,13 @@
 #include "../../utility.h"
 #include "cimitero.h"
 
+oggetto oggetti_cimitero[];
 /* TODO finire enigmi */
 enigma enigmi_cimitero[] = {
-    {"Indovina la parola scritta sulla pagina:\n", "crepuscolo", false, /* enigma libro */
+    {"Scopri la parola scritta sulla pagina:\n", "crepuscolo", false, /* enigma libro */
      "Hai indovinato la parola! Sull'altare si è aperto un cassetto.\n",
      &oggetti_cimitero[7]}, 
-    {"Indovinello?", "risposta", false, /* enigma scritta rovinata */
+    {"Indovinello:\n", "la spada", false, /* enigma scritta rovinata */
      "Bravo, hai indovinato! La terra si smuove e vedi qualcosa sbucare dalla tomba.\n",
      &oggetti_cimitero[8]} 
 };
@@ -63,10 +64,16 @@ oggetto oggetti_cimitero[] = {
      true, false, false, &enigmi_cimitero[0]
     },
     {"scritta_rovinata",
-     "L'oggetto ha un enigma, fare take per avviarlo.\n",
-     "Enigma risolto.\n",
+     "Ricordati i giorni nei quali fui %/a/.,\n"
+     "!n|an:_ui**t* e battuta...maltrattata.\n"
+     "La %/*_* mi circondava, e poco importava,\n"
+     "poiché qualunque fosse il _.<*r* che infliggevo, non m/([re* mai.\n",
+     "Ricordati i giorni nei quali fui usata,\n"
+     "insanguinata e battuta...maltrattata.\n"
+     "La morte mi circondava, e poco importava,\n"
+     "poiché qualunque fosse il dolore che infliggevo, non marcirei mai.\n",
      "Sopra c'è una **scritta_rovinata**.\n",
-     false, true, false, &enigmi_cimitero[1]
+     true, false, false, &enigmi_cimitero[1]
     },
     /* oggetti sbloccabili dalle use */
     {"torcia_UV",
