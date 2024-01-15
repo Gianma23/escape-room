@@ -7,6 +7,7 @@ static int scenario_scelto = -1;
 static enigma *enigma_attivato = NULL;
 static int giocatore_enigma_attivato = -1;
 static int token = 0;
+static gruppo giocatori;
 
 static scenario *scenari[] = {
     &scenario_cimitero
@@ -90,17 +91,32 @@ void prendi_scenari(char *buf)
 }
 
 /* Setta lo scenario scelto con id_scenario */
-char* inizia_scenario(int id_scenario)
+char* inizia_scenario(int sock, int id_scenario, bool *send_both)
 {
     if(id_scenario < 0 || id_scenario >= N_SCENARI) {
         return "Scenario non disponibile.\n";
+    }
+    if(giocatori.attivo && giocatori.indirizzi[0] != sock) {
+        return "Solo l'owner del gruppo può avviare uno scenario.\n";
+    }
+    if(giocatori.attivo && giocatori.num_giocatori < MAX_GIOCATORI_GRUPPO) {
+        return "Gruppo avviato, lo scenario può partire solo se il gruppo è pieno.\n";
+    }
+    if(giocatori.attivo) {
+        *send_both = true;
     }
     scenario_scelto = id_scenario;
     return "Scenario iniziato, buona fortuna!\n";
 }
 
-char* termina_scenario()
+char* termina_scenario(int sock, bool *send_both)
 {
+    if(giocatori.attivo && giocatori.indirizzi[0] != sock) {
+        return "Solo l'owner del gruppo può terminare uno scenario.\n";
+    }
+    if(giocatori.attivo) {
+        *send_both = true;
+    }
     /* TODO resettare tutte le variabili dello scenario */
     scenario_scelto = -1;
     return "Scenario terminato.\n";
@@ -283,4 +299,39 @@ bool is_risposta_enigma(int sock)
 bool is_game_started()
 {
     return scenario_scelto != -1;
+}
+
+/* INTERFACCIA GRUPPO */
+
+char* avvia_gruppo(int sock)
+{
+    if(giocatori.attivo) {
+        return "Gruppo per giocare già creato.\n";
+    }
+
+    giocatori.attivo = true;
+    giocatori.num_giocatori++;
+    giocatori.indirizzi[0] = sock;
+    return "Gruppo per la stanza creato con successo!\n";
+}
+
+char* entra_gruppo(int sock, bool * send_both)
+{
+    if(!giocatori.attivo) {
+        return "Gruppo non esistente, impossibile entrare.\n";
+    }
+    if(giocatori.num_giocatori == MAX_GIOCATORI_GRUPPO) {
+        return "Gruppo già pieno!\n";
+    }
+    if(sock == giocatori.indirizzi[0]) {
+        return "Sei già nel gruppo!\n";
+    }
+    giocatori.indirizzi[giocatori.num_giocatori++] = sock;
+    *send_both = true;
+    return "Gruppo completo! In attesa che il creatore inizi lo scenario.\n";
+}
+
+int prendi_giocatore2()
+{
+    return giocatori.indirizzi[1];
 }

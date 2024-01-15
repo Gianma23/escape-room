@@ -17,7 +17,6 @@ int invia_messaggio(int p_socket, char* p_messaggio, char* p_errore)
 
     /* Invio dimensione del messaggio */
     ret = send(p_socket, &lmsg, sizeof(uint16_t), 0);
-    printf("%d\n", ret);
     if(ret < 0){
         strcpy(err, p_errore);
         perror(strcat(err, " (lunghezza)\n"));
@@ -26,10 +25,8 @@ int invia_messaggio(int p_socket, char* p_messaggio, char* p_errore)
     if(ret == 0) {
         return  ret;
     }
-    printf("%d\n", ret);
     /* Invio messaggio */
     ret = send(p_socket, p_messaggio, len, 0);
-    printf("%d\n", ret);
     if(ret < 0){
         strcpy(err, p_errore);
         perror(strcat(err, "\n"));

@@ -61,9 +61,10 @@ typedef struct gruppo {
     int indirizzi[MAX_GIOCATORI_GRUPPO];
 } gruppo;
 
+/* funzioni gioco */
 void prendi_scenari(char *);
-char* inizia_scenario(int);
-char* termina_scenario();
+char* inizia_scenario(int, int, bool *);
+char* termina_scenario(int, bool *);
 char* prendi_descrizione(char *);
 char* prendi_inventario(int);
 char* prendi_oggetto(int, char *);
@@ -73,5 +74,10 @@ char* risolvi_enigma(char *);
 int token_rimasti();
 bool is_game_started();
 bool is_risposta_enigma(int);
+
+/* funzioni gruppo */
+char* avvia_gruppo(int);
+char* entra_gruppo(int, bool *);
+int prendi_giocatore2();
 
 #endif

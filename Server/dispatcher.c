@@ -1,16 +1,18 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include "dispatcher.h"
 #include "auth.h"
 #include "gioco.h"
 #include "timer.h"
 
-static gruppo giocatori = {};
+/* settata a true quando si vuole mandare il messaggio a tutti i giocatori */
 static bool send_both = false;
+
 /* ===================== HANDLERS ===================== */
-/*  cl_addr: indirizzo del client che ha invocato il comando
+/*  cl_sock: socket del client che ha invocato il comando
     opt: opzioni del comando */
 
 char* handler_register(int cl_sock, char *opt)
@@ -31,14 +33,8 @@ char* handler_startgroup(int cl_sock, char* opt)
     if(is_game_started()) {
         return "Impossibile creare il gruppo, è già in corso uno scenario.\n";
     }
-    if(giocatori.attivo) {
-        return "Gruppo per giocare già creato.\n";
-    }
-
-    giocatori.attivo = true;
-    giocatori.num_giocatori++;
-    giocatori.indirizzi[0] = cl_sock;
-    return "Gruppo per la stanza creato con successo!\n";
+    /* TODO controllare che non ci siano troppi argomenti, anche per le altre funzioni */
+    return avvia_gruppo(cl_sock);
 }
 
 char* handler_joingroup(int cl_sock, char* opt)
@@ -46,18 +42,7 @@ char* handler_joingroup(int cl_sock, char* opt)
     if(!is_logged(cl_sock)) {
         return "Non sei loggato!\n";
     }
-    if(!giocatori.attivo) {
-        return "Gruppo non esistente, impossibile entrare.\n";
-    }
-    if(giocatori.num_giocatori == MAX_GIOCATORI_GRUPPO) {
-        return "Gruppo già pieno!\n";
-    }
-    /* if(compara_addr(&giocatori.indirizzi[0], &cl_sock)) {
-        return "Sei già nel gruppo!\n";
-    } */
-    giocatori.num_giocatori++;
-    giocatori.indirizzi[giocatori.num_giocatori++] = cl_sock;
-    return "Ingresso nel gruppo! In attesa che il creatore inizi lo scenario.\n";
+    return entra_gruppo(cl_sock, &send_both);
 }
 
 char* handler_start(int cl_sock, char* opt)
@@ -67,12 +52,6 @@ char* handler_start(int cl_sock, char* opt)
     }
     if(is_game_started()) {
         return "Impossibile iniziare, il gioco è già iniziato!\n";
-    }
-    if(giocatori.attivo && giocatori.indirizzi[0] != cl_sock) {
-        return "Solo l'owner del gruppo può avviare uno scenario.\n";
-    }
-    if(giocatori.attivo) {
-        send_both = true;
     }
 
     char* str_scenario = strtok(opt, " ");
@@ -84,7 +63,7 @@ char* handler_start(int cl_sock, char* opt)
         return "Troppi parametri.\n";
     }
     start_timer(600); /* 10 min di tempo per completare lo scenario */
-    return inizia_scenario(id_scenario);
+    return inizia_scenario(cl_sock, id_scenario, &send_both);
 }
 
 char* handler_look(int cl_sock, char* opt) 
@@ -180,22 +159,17 @@ char* handler_end(int cl_sock, char *opt)
     if(!is_game_started()) {
         return "Nessuno scenario iniziato.\n";
     }
-    if(giocatori.attivo && giocatori.indirizzi[0] != cl_sock) {
-        return "Solo l'owner del gruppo può avviare uno scenario.\n";
-    }
-    if(giocatori.attivo) {
-        send_both = true;
-    }
-    /* se il gruppo è presente, faccio una send anche al secondo giocatore per
-        avvisarlo che il gioco è finito.*/
-    return termina_scenario();
+    return termina_scenario(cl_sock, &send_both);
 }
 
 char* handler_stop(int cl_sock, char* opt)
 {
     printf("Chiusura server...\n");
     close(cl_sock);
-    /* TODO chiudere anche il socket dell'altro giocatore se sta giocando in gruppo */
+    int sock_giocatore2 = prendi_giocatore2();
+    if(sock_giocatore2 != -1) {
+        close(sock_giocatore2);
+    }
     exit(0);
 }
 
@@ -275,7 +249,7 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
 
             invia_messaggio(socket, risposta, "Errore invio risposta al comando");
             if(send_both) {
-                invia_messaggio(socket/* TODO prendere altro giocatore */, risposta, "Errore invio risposta al comando");
+                invia_messaggio(prendi_giocatore2(), risposta, "Errore invio risposta al comando");
                 send_both = false;
             }
             return;
