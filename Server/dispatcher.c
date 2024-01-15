@@ -13,19 +13,19 @@ static gruppo giocatori = {};
 /*  cl_addr: indirizzo del client che ha invocato il comando
     opt: opzioni del comando */
 
-char* handler_register(struct sockaddr_in cl_addr, char *opt)
+char* handler_register(int cl_sock, char *opt)
 {
     return register_user(opt);
 }
 
-char* handler_login(struct sockaddr_in cl_addr, char* opt)
+char* handler_login(int cl_sock, char* opt)
 {
-    return login_user(opt, cl_addr);
+    return login_user(opt, cl_sock);
 }
 
-char* handler_startgroup(struct sockaddr_in cl_addr, char* opt)
+char* handler_startgroup(int cl_sock, char* opt)
 {
-    if(!is_logged(cl_addr)) {
+    if(!is_logged(cl_sock)) {
         return "Non sei loggato!\n";
     }
     if(is_game_started()) {
@@ -37,13 +37,13 @@ char* handler_startgroup(struct sockaddr_in cl_addr, char* opt)
 
     giocatori.attivo = true;
     giocatori.num_giocatori++;
-    giocatori.indirizzi[0] = cl_addr;
+    /* giocatori.indirizzi[0] = cl_sock; */
     return "Gruppo per la stanza creato con successo!\n";
 }
 
-char* handler_joingroup(struct sockaddr_in cl_addr, char* opt)
+char* handler_joingroup(int cl_sock, char* opt)
 {
-    if(!is_logged(cl_addr)) {
+    if(!is_logged(cl_sock)) {
         return "Non sei loggato!\n";
     }
     if(!giocatori.attivo) {
@@ -52,18 +52,18 @@ char* handler_joingroup(struct sockaddr_in cl_addr, char* opt)
     if(giocatori.num_giocatori == MAX_GIOCATORI_GRUPPO) {
         return "Gruppo già pieno!\n";
     }
-    if(compara_addr(&giocatori.indirizzi[0], &cl_addr)) {
+    /* if(compara_addr(&giocatori.indirizzi[0], &cl_sock)) {
         return "Sei già nel gruppo!\n";
-    }
+    } */
 
     giocatori.num_giocatori++;
-    giocatori.indirizzi[giocatori.num_giocatori++] = cl_addr;
+    /* giocatori.indirizzi[giocatori.num_giocatori++] = cl_sock; */
     return "Ingresso nel gruppo! In attesa che il creatore inizi lo scenario.\n";
 }
 
-char* handler_start(struct sockaddr_in cl_addr, char* opt)
+char* handler_start(int cl_sock, char* opt)
 {
-    if(!is_logged(cl_addr)) {
+    if(!is_logged(cl_sock)) {
         return "Non sei loggato!\n";
     }
     if(is_game_started()) {
@@ -82,9 +82,9 @@ char* handler_start(struct sockaddr_in cl_addr, char* opt)
     return inizia_scenario(id_scenario);
 }
 
-char* handler_look(struct sockaddr_in cl_addr, char* opt) 
+char* handler_look(int cl_sock, char* opt) 
 {
-    if(!is_logged(cl_addr)) {
+    if(!is_logged(cl_sock)) {
         return "Non sei loggato!\n";
     }
     if(!is_game_started()) {
@@ -98,9 +98,9 @@ char* handler_look(struct sockaddr_in cl_addr, char* opt)
     return prendi_descrizione(opzione);
 }
 
-char* handler_take(struct sockaddr_in cl_addr, char* opt)
+char* handler_take(int cl_sock, char* opt)
 {
-    if(!is_logged(cl_addr)) {
+    if(!is_logged(cl_sock)) {
         return "Non sei loggato!\n";
     }
     if(!is_game_started()) {
@@ -114,12 +114,12 @@ char* handler_take(struct sockaddr_in cl_addr, char* opt)
     if(strtok(NULL, " ") != NULL) {
         return "Troppi parametri.\n";
     }
-    return prendi_oggetto(cl_addr, oggetto);
+    return "";/* prendi_oggetto(cl_sock, oggetto); */
 }
 
-char* handler_drop(struct sockaddr_in cl_addr, char* opt)
+char* handler_drop(int cl_sock, char* opt)
 {
-    if(!is_logged(cl_addr)) {
+    if(!is_logged(cl_sock)) {
         return "Non sei loggato!\n";
     }
     if(!is_game_started()) {
@@ -133,12 +133,12 @@ char* handler_drop(struct sockaddr_in cl_addr, char* opt)
     if(strtok(NULL, " ") != NULL) {
         return "Troppi parametri.\n";
     }
-    return /* lascia_oggetto(cl_addr, oggetto) */"TODO\n";
+    return /* lascia_oggetto(cl_sock, oggetto) */"TODO\n";
 }
 
-char* handler_use(struct sockaddr_in cl_addr, char* opt)
+char* handler_use(int cl_sock, char* opt)
 {
-    if(!is_logged(cl_addr)) {
+    if(!is_logged(cl_sock)) {
         return "Non sei loggato!\n";
     }
     if(!is_game_started()) {
@@ -153,31 +153,34 @@ char* handler_use(struct sockaddr_in cl_addr, char* opt)
     if(strtok(NULL, " ") != NULL) {
         return "Troppi parametri.\n";
     }
-    return utilizza_oggetti(cl_addr, obj1, obj2);
+    return "";/* utilizza_oggetti(cl_sock, obj1, obj2) */;
 }
 
-char* handler_objs(struct sockaddr_in cl_addr, char* opt)
+char* handler_objs(int cl_sock, char* opt)
 {
-    if(!is_logged(cl_addr)) {
+    if(!is_logged(cl_sock)) {
         return "Non sei loggato!\n";
     }
     if(!is_game_started()) {
         return "Nessuno scenario iniziato. Fare prima start <stanza>\n";
     }
-    return prendi_inventario(cl_addr);
+    return "";/* prendi_inventario(cl_sock) */;
 }
 
-char* handler_end(struct sockaddr_in cl_addr, char *opt)
+char* handler_end(int cl_sock, char *opt)
 {
-    if(!is_logged(cl_addr)) {
+    if(!is_logged(cl_sock)) {
         return "Non sei loggato!\n";
     }
     return NULL;
 }
 
-char* handler_stop(struct sockaddr_in cl_addr, char* opt)
+char* handler_stop(int cl_sock, char* opt)
 {
-return NULL;
+    printf("Chiusura server...\n");
+    /* trova il file descriptor del socket avente indirizzo cl_addr */
+    
+    exit(0);
 }
 
 /* COMANDI =============== */
@@ -258,14 +261,16 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
                 sprintf(risposta, "- Rimanenti %d minuti e %d secondi.\n"
                                   "- Token rimasti da trovare: %d\n\n", time/60, time%60, token_rimasti());
             }
-            strcat(risposta, lista_comandi[i].handler(cl_addr, opt));
+            strcat(risposta, lista_comandi[i].handler(socket, opt));
 
             invia_messaggio(socket, risposta, "Errore invio risposta al comando");
             return;
         }
     }   
     printf("comando non trovato.\n");
-    invia_messaggio(socket, "comando non trovato.\n", "Errore invio risposta comando non trovato");
+    if(strcmp(soggetto, "client") == 0) {
+        invia_messaggio(socket, "comando non trovato.\n", "Errore invio risposta comando non trovato");
+    }
 }
 
 /* La funzione restituisce i comandi disponibili al client */

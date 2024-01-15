@@ -8,36 +8,48 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-bool invia_messaggio(int p_socket, char* p_messaggio, char* p_errore){
-    int len = strlen(p_messaggio) + 1;
-    uint16_t lmsg = htons(len);
+int invia_messaggio(int p_socket, char* p_messaggio, char* p_errore)
+{
     int ret;
+    char err[256];
+    size_t len = strlen(p_messaggio) + 1;
+    uint16_t lmsg = htons(len);
 
-    /* Invio al partner la dimensione del messaggio */
+    /* Invio dimensione del messaggio */
     ret = send(p_socket, &lmsg, sizeof(uint16_t), 0);
+    printf("%d\n", ret);
     if(ret < 0){
-        perror(strcat(p_errore, " (lunghezza)\n"));
+        strcpy(err, p_errore);
+        perror(strcat(err, " (lunghezza)\n"));
         return ret;
     }
-
-    /* Invio al partner il messaggio */
+    if(ret == 0) {
+        return  ret;
+    }
+    printf("%d\n", ret);
+    /* Invio messaggio */
     ret = send(p_socket, p_messaggio, len, 0);
+    printf("%d\n", ret);
     if(ret < 0){
-        perror(strcat(p_errore, "\n"));
+        strcpy(err, p_errore);
+        perror(strcat(err, "\n"));
         return ret;
     }
     return ret;
 }
 
-bool ricevi_messaggio(int p_socket, char* p_messaggio, char* p_errore){
+int ricevi_messaggio(int p_socket, char* p_messaggio, char* p_errore){
     int ret;
     uint16_t lmsg;
-    int len;
+    size_t len;
 
     ret = recv(p_socket, &lmsg, sizeof(uint16_t), 0);
     if(ret < 0){
         perror(strcat(p_errore, " (lunghezza)\n"));
         return ret;
+    }
+    if(ret == 0) {
+        return  ret;
     }
 				
     /* Conversione in formato 'host' */

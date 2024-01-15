@@ -49,11 +49,20 @@ int main(int argc, char *argv[])
         memset(buffer, 0, sizeof(buffer));
         fgets(buffer, COMANDO_DIM, stdin);
         buffer[strcspn(buffer, "\n")] = 0; /* elimino carattere \n messo dalla fgets */
-        if(!invia_messaggio(cl_sock, buffer, "Errore in fase di invio riga di comando find.")) 
+        ret = invia_messaggio(cl_sock, buffer, "Errore in fase di invio riga di comando find.");
+        printf("%d\n", ret);
+        if(ret < 0) {
+            /* errore di invio */
+            printf("bug\n");
             exit(1);
+        }
 
         memset(buffer, 0, sizeof(buffer));
-        ricevi_messaggio(cl_sock, buffer, "Errore in fase di ricezione");
+        ret = ricevi_messaggio(cl_sock, buffer, "Errore in fase di ricezione");
+        if(ret == 0) {
+            printf("Connessione chiusa dal server.\n");
+            exit(0);
+        }
         printf("%s", buffer);
         printf(DIVISORE);
     } 

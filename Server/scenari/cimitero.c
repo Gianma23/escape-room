@@ -67,7 +67,7 @@ oggetto oggetti_cimitero[] = {
      "Ricordati i giorni nei quali fui %/a/.,\n"
      "!n|an:_ui**t* e battuta...maltrattata.\n"
      "La %/*_* mi circondava, e poco importava,\n"
-     "poiché qualunque fosse il _.<*r* che infliggevo, non m/([re* mai.\n",
+     "poiché qualunque fosse il _.<*r* che infliggevo, non m/(.re* mai.\n",
      "Ricordati i giorni nei quali fui usata,\n"
      "insanguinata e battuta...maltrattata.\n"
      "La morte mi circondava, e poco importava,\n"

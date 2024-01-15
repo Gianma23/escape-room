@@ -56,7 +56,7 @@ char* register_user(char *opt)
 /*  opt: opzioni del comando nel formato <username> <password>
     Effettua il login dell'utente, controllando che non sia 
     già loggato */
-char* login_user(char* opt, struct sockaddr_in cl_addr)
+char* login_user(char* opt, int cl_sock)
 {
     char *record = NULL;
     char record_user[USER_DIM];
@@ -81,14 +81,15 @@ char* login_user(char* opt, struct sockaddr_in cl_addr)
         return "Troppi parametri.\n";
     }
         
-    /* controlli */
+    /* TODO controlli input dimensioni */
     if(num_login == MAX_GIOCATORI_GRUPPO) {
         return "Raggiunto il massimo numero di persone loggate insieme.\n";
     }
-    if(num_login == 1 && compara_addr(&cl_addr, &loggati[0].addr)) {
+    if(num_login == 1 && cl_sock == loggati[0].sock) {
         return "Sei già loggato!\n";
     }
-    if(num_login == 1 && strcmp(*(loggati[0].username), user) == 0) {
+    printf("username loggato: %s, user: %s\n", loggati[0].username, user);
+    if(num_login == 1 && strcmp(loggati[0].username, user) == 0) {
         return "Questo username è già loggato su un altro dispositivo.\n";
     }
 
@@ -115,17 +116,19 @@ char* login_user(char* opt, struct sockaddr_in cl_addr)
     if(!trovato) {
         return "Username non registrato.\n";
     }
-    loggati[num_login++].addr = cl_addr;
+    loggati[num_login].sock = cl_sock;
+    strcpy(loggati[num_login].username, user);
+    num_login++;
     return "Login avvenuto con successo!\n";
 }
 
 /*  cl_sock: socket del client 
     Effettua il logout dello user associato a cl_sock */
-char* logout_user(struct sockaddr_in cl_addr)
+char* logout_user(int cl_sock)
 {
     int i;
     for(i = 0; i < num_login; i++) {
-        if(compara_addr(&cl_addr, &loggati[i].addr)) {
+        if(cl_sock == loggati[i].sock) {
             memset(&loggati[i], 0, sizeof(authentication));
             num_login--;
             break;
@@ -136,12 +139,12 @@ char* logout_user(struct sockaddr_in cl_addr)
 
 /*  cl_sock: socket del client 
     La funzione controlla se lo user associato a cl_sock sia loggato */
-bool is_logged(struct sockaddr_in cl_addr)
+bool is_logged(int cl_sock)
 {
     int i;
     /* TODO: se si disconnette un giocatore il gioco finisce */
     for(i = 0; i < num_login; i++) {
-        if(compara_addr(&cl_addr, &loggati[i].addr)) {
+        if(cl_sock == loggati[i].sock) {
             return true;
         }
     }
