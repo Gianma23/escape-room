@@ -151,6 +151,8 @@ char* handler_objs(int cl_sock, char* opt)
     return prendi_inventario(cl_sock);
 }
 
+/*  termina lo scenario, resettandolo. Se è presente un gruppo, non
+    viene eliminato */
 char* handler_end(int cl_sock, char *opt)
 {
     if(!is_logged(cl_sock)) {
@@ -240,6 +242,7 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
             if(is_game_started() && (time = remaining_time()) <= 0) {
                 strcpy(risposta, "Tempo scaduto! Il gioco è finito.\n");
                 /* TODO: reset gioco */
+                return;
             }
             else if(is_game_started()){
                 sprintf(risposta, "- Rimanenti %d minuti e %d secondi.\n"

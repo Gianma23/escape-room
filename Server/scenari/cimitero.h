@@ -7,6 +7,8 @@
 #define N_LOCAZIONI_CIMITERO 6
 #define N_UTILIZZI_CIMITERO 5
 #define N_TOKEN_CIMITERO 5
+#define N_BLOCCATI_CIMITERO 6
+#define N_NASCOSTI_CIMITERO 4
 
 extern scenario scenario_cimitero;
 

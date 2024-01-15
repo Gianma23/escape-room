@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     FD_ZERO(&read_fds);
 
     FD_SET(list_sock, &master);
-    FD_SET(0, &master);
+    FD_SET(STDIN_FILENO, &master);
     fdmax = list_sock;
 
     for(;;) {
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
         for(i = 0; i <= fdmax; i++) {
             if(FD_ISSET(i, &read_fds)) {
                 /* stdin */
-                if(i == 0) {
+                if(i == STDIN_FILENO) {
                     scanf("%s", buffer);
                     command_dispatcher(i, buffer, "server");
                 }
@@ -110,7 +110,6 @@ int main(int argc, char *argv[])
                     printf("Nuovo client connesso, socket di comunicazione: %d\n", comm_sock);
 
                     /* invio al client degli scenari e comandi disponibili */
-                    /* TODO: mettere in una sola send */
                     memset(buffer, 0, sizeof(buffer));
                     comandi_client(buffer);
                     invia_messaggio(comm_sock, buffer, "Errore invio comandi\n");
@@ -126,7 +125,7 @@ int main(int argc, char *argv[])
                 /* socket diverso da quello di ascolto */
                 else {
                     ret = ricevi_messaggio(i, buffer, "Errore ricezione comando dal client\n");
-                    if(ret == STDIN_FILENO) {
+                    if(ret == 0) {
                         printf("Sconnessione client in corso...\n");
                         /* printf("%s", logout_user(i)); */
                         /* TODO: funzione reset scenario, gruppo e logout di tutti */

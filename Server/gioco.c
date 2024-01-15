@@ -114,10 +114,29 @@ char* termina_scenario(int sock, bool *send_both)
     if(giocatori.attivo && giocatori.indirizzi[0] != sock) {
         return "Solo l'owner del gruppo può terminare uno scenario.\n";
     }
-    if(giocatori.attivo) {
+    if(giocatori.attivo && send_both != NULL) {
         *send_both = true;
     }
-    /* TODO resettare tutte le variabili dello scenario */
+    int i;
+    const scenario *scen = scenari[scenario_scelto];
+    for(i = 0; i < scen->n_oggetti; i++) {
+        oggetto *obj = &scen->oggetti[i];
+        /* TODO resettare is_prendibile */
+        if(i < scen->n_bloccati) {
+            obj->is_bloccato = true;
+            obj->is_nascosto = false;
+        }
+        else if(i < (scen->n_bloccati + scen->n_nascosti)) {
+            obj->is_bloccato = false;
+            obj->is_nascosto = true;
+        }
+        else {
+            obj->is_bloccato = false;
+            obj->is_nascosto = false;
+        }
+        obj->is_preso = false;
+        obj->sock_possessore = -1;
+    }
     scenario_scelto = -1;
     return "Scenario terminato.\n";
 }
@@ -162,7 +181,7 @@ char* prendi_oggetto(int sock, char *nome_obj)
     if(obj->enigma != NULL && !obj->enigma->is_risolto) {
         return attiva_enigma(obj, sock);
     }
-    if(obj->is_bloccato) {
+    if(obj->is_bloccato || obj->enigma != NULL) {
         return "Non puoi prendere questo oggetto!\n";
     }
     if(obj->is_preso) {
@@ -213,15 +232,17 @@ char* utilizza_oggetti(int sock, char *nome_obj1, char *nome_obj2)
                 util->oggetto_nascosto->is_bloccato = false;
                 util->oggetto_nascosto->is_nascosto = false;
             }
+            /* TODO sistemare bloccato e prendibile obj2 */
             /* blocco oggetto1 */
-            obj1->is_bloccato = true;
             obj1->is_nascosto = true;
             obj1->is_preso = false;
             obj1->sock_possessore = -1;
             /* sblocco oggetto2 */
             obj2->is_bloccato = false;
             /* assegno un token e guardo se la partita è finita */
-            token++;
+            if(util->has_token) {
+                token++; 
+            }
             if(is_game_ended()) {
                 /* TODO vittoria, resetta il gioco */
             }
@@ -255,7 +276,7 @@ char* prendi_inventario(int sock)
     ATTENZIONE: non controlla se c'è un enigma realmente attivo */
 char* risolvi_enigma(char *risposta)
 {
-    static char tmp[32];
+    static char tmp[256];
     if(strcmp(risposta, enigma_attivato->soluzione) != 0) {
         strcpy(tmp, "Soluzione errata.\n");
     }

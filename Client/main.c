@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/select.h>
 #include "../utility.c"
 
 #define SERVER_IP "127.0.0.1"
@@ -16,8 +17,9 @@
 
 int main(int argc, char *argv[])
 {
-    int ret;
+    int ret, i;
     int cl_sock;
+    fd_set master, read_fds;
     struct sockaddr_in sv_addr;
     in_port_t porta = htons(SERVER_PORT);
     char buffer[BUFFER_DIM];
@@ -45,25 +47,48 @@ int main(int argc, char *argv[])
     printf("%s", buffer);
     printf(DIVISORE);
 
+    FD_ZERO(&master);
+    FD_ZERO(&read_fds);
+
+    FD_SET(cl_sock, &master);
+    FD_SET(STDIN_FILENO, &master);
+
     for(;;) {
         memset(buffer, 0, sizeof(buffer));
-        fgets(buffer, COMANDO_DIM, stdin);
-        buffer[strcspn(buffer, "\n")] = 0; /* elimino carattere \n messo dalla fgets */
-        ret = invia_messaggio(cl_sock, buffer, "Errore in fase di invio riga di comando find.");
-        printf("%d\n", ret);
-        if(ret < 0) {
-            /* errore di invio */
-            printf("bug\n");
-            exit(1);
-        }
+        read_fds = master;
+        select(cl_sock + 1, &read_fds, NULL, NULL, NULL);
 
-        memset(buffer, 0, sizeof(buffer));
-        ret = ricevi_messaggio(cl_sock, buffer, "Errore in fase di ricezione");
-        if(ret == 0) {
-            printf("Connessione chiusa dal server.\n");
-            exit(0);
-        }
-        printf("%s", buffer);
-        printf(DIVISORE);
+        for(i = 0; i <= cl_sock; i++) {
+            if(FD_ISSET(i, &read_fds)) {
+                if(i == STDIN_FILENO) {
+                    fgets(buffer, COMANDO_DIM, stdin);
+                    buffer[strcspn(buffer, "\n")] = 0; /* elimino carattere \n messo dalla fgets */
+                    ret = invia_messaggio(cl_sock, buffer, "Errore in fase di invio riga di comando find.");
+                    if(ret < 0) {
+                        /* errore di invio */
+                        exit(1);
+                    }
+
+                    memset(buffer, 0, sizeof(buffer));
+                    ret = ricevi_messaggio(cl_sock, buffer, "Errore in fase di ricezione");
+                    if(ret == 0) {
+                        printf("Connessione chiusa dal server.\n");
+                        exit(0);
+                    }
+                    printf("%s", buffer);
+                    printf(DIVISORE);
+                }
+                else if(i == cl_sock) {
+                    memset(buffer, 0, sizeof(buffer));
+                    ret = ricevi_messaggio(cl_sock, buffer, "Errore in fase di ricezione");
+                    if(ret == 0) {
+                        printf("Connessione chiusa dal server.\n");
+                        exit(0);
+                    }
+                    printf("%s", buffer);
+                    printf(DIVISORE);
+                }
+            }
+        } /* fine for */
     } 
 }
