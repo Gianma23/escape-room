@@ -27,9 +27,9 @@ typedef struct oggetto {
     bool is_nascosto;
     /* se ha un enigma deve essere attivato con la take */
     enigma *enigma;
-    /* indirizzo IP di chi prende l'oggetto per verificare se può usarlo con la use
+    /* socket di chi prende l'oggetto per verificare se può usarlo con la use
        (non ci sarebbe questo problema senza multiplayer) */
-    struct sockaddr_in addr_possessore;
+    int sock_possessore;
 } oggetto;
 typedef struct locazione {
     char *nome;
@@ -58,19 +58,20 @@ typedef struct scenario {
 typedef struct gruppo {
     bool attivo;
     int num_giocatori;
-    struct sockaddr_in indirizzi[MAX_GIOCATORI_GRUPPO];
+    int indirizzi[MAX_GIOCATORI_GRUPPO];
 } gruppo;
 
 void prendi_scenari(char *);
 char* inizia_scenario(int);
+char* termina_scenario();
 char* prendi_descrizione(char *);
-char* prendi_inventario(struct sockaddr_in);
-char* prendi_oggetto(struct sockaddr_in, char *);
-char* utilizza_oggetti(struct sockaddr_in, char *, char *);
+char* prendi_inventario(int);
+char* prendi_oggetto(int, char *);
+char* lascia_oggetto(int, char *);
+char* utilizza_oggetti(int, char *, char *);
 char* risolvi_enigma(char *);
 int token_rimasti();
-bool reset_scenario(int);
 bool is_game_started();
-bool is_risposta_enigma(struct sockaddr_in);
+bool is_risposta_enigma(int);
 
 #endif

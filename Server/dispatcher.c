@@ -8,7 +8,7 @@
 #include "timer.h"
 
 static gruppo giocatori = {};
-
+static bool send_both = false;
 /* ===================== HANDLERS ===================== */
 /*  cl_addr: indirizzo del client che ha invocato il comando
     opt: opzioni del comando */
@@ -37,7 +37,7 @@ char* handler_startgroup(int cl_sock, char* opt)
 
     giocatori.attivo = true;
     giocatori.num_giocatori++;
-    /* giocatori.indirizzi[0] = cl_sock; */
+    giocatori.indirizzi[0] = cl_sock;
     return "Gruppo per la stanza creato con successo!\n";
 }
 
@@ -55,9 +55,8 @@ char* handler_joingroup(int cl_sock, char* opt)
     /* if(compara_addr(&giocatori.indirizzi[0], &cl_sock)) {
         return "Sei già nel gruppo!\n";
     } */
-
     giocatori.num_giocatori++;
-    /* giocatori.indirizzi[giocatori.num_giocatori++] = cl_sock; */
+    giocatori.indirizzi[giocatori.num_giocatori++] = cl_sock;
     return "Ingresso nel gruppo! In attesa che il creatore inizi lo scenario.\n";
 }
 
@@ -68,6 +67,12 @@ char* handler_start(int cl_sock, char* opt)
     }
     if(is_game_started()) {
         return "Impossibile iniziare, il gioco è già iniziato!\n";
+    }
+    if(giocatori.attivo && giocatori.indirizzi[0] != cl_sock) {
+        return "Solo l'owner del gruppo può avviare uno scenario.\n";
+    }
+    if(giocatori.attivo) {
+        send_both = true;
     }
 
     char* str_scenario = strtok(opt, " ");
@@ -114,7 +119,7 @@ char* handler_take(int cl_sock, char* opt)
     if(strtok(NULL, " ") != NULL) {
         return "Troppi parametri.\n";
     }
-    return "";/* prendi_oggetto(cl_sock, oggetto); */
+    return prendi_oggetto(cl_sock, oggetto);
 }
 
 char* handler_drop(int cl_sock, char* opt)
@@ -133,7 +138,7 @@ char* handler_drop(int cl_sock, char* opt)
     if(strtok(NULL, " ") != NULL) {
         return "Troppi parametri.\n";
     }
-    return /* lascia_oggetto(cl_sock, oggetto) */"TODO\n";
+    return lascia_oggetto(cl_sock, oggetto);
 }
 
 char* handler_use(int cl_sock, char* opt)
@@ -153,7 +158,7 @@ char* handler_use(int cl_sock, char* opt)
     if(strtok(NULL, " ") != NULL) {
         return "Troppi parametri.\n";
     }
-    return "";/* utilizza_oggetti(cl_sock, obj1, obj2) */;
+    return utilizza_oggetti(cl_sock, obj1, obj2);
 }
 
 char* handler_objs(int cl_sock, char* opt)
@@ -164,7 +169,7 @@ char* handler_objs(int cl_sock, char* opt)
     if(!is_game_started()) {
         return "Nessuno scenario iniziato. Fare prima start <stanza>\n";
     }
-    return "";/* prendi_inventario(cl_sock) */;
+    return prendi_inventario(cl_sock);
 }
 
 char* handler_end(int cl_sock, char *opt)
@@ -172,14 +177,25 @@ char* handler_end(int cl_sock, char *opt)
     if(!is_logged(cl_sock)) {
         return "Non sei loggato!\n";
     }
-    return NULL;
+    if(!is_game_started()) {
+        return "Nessuno scenario iniziato.\n";
+    }
+    if(giocatori.attivo && giocatori.indirizzi[0] != cl_sock) {
+        return "Solo l'owner del gruppo può avviare uno scenario.\n";
+    }
+    if(giocatori.attivo) {
+        send_both = true;
+    }
+    /* se il gruppo è presente, faccio una send anche al secondo giocatore per
+        avvisarlo che il gioco è finito.*/
+    return termina_scenario();
 }
 
 char* handler_stop(int cl_sock, char* opt)
 {
     printf("Chiusura server...\n");
-    /* trova il file descriptor del socket avente indirizzo cl_addr */
-    
+    close(cl_sock);
+    /* TODO chiudere anche il socket dell'altro giocatore se sta giocando in gruppo */
     exit(0);
 }
 
@@ -223,17 +239,11 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
     const int N_COMANDI = strcmp(soggetto, "server") == 0 ? N_COMANDI_SERVER : N_COMANDI_CLIENT;
     const comando *lista_comandi = strcmp(soggetto, "server") == 0 ? lista_comandi_server : lista_comandi_client;
     memset(risposta, 0, sizeof(risposta));
-
-    /* prendo indirizzo del client */
-    struct sockaddr_in cl_addr;
-    socklen_t len = sizeof(cl_addr);
-    memset(&cl_addr, 0, sizeof(cl_addr));
-    getpeername(socket, (struct sockaddr*)&cl_addr, &len);
     
     /* TODO rivedere controllo se enigma è attivo, contando il multiplayer */
     /* se il comando è arrivato da un giocatore con un enigma attivo, 
        l'input deve essere visto come la risposta all'enigma */
-    if(is_risposta_enigma(cl_addr)) {
+    if(is_risposta_enigma(socket)) {
         com = strtok(buffer, "\n");
         strcat(risposta, risolvi_enigma(com));
         invia_messaggio(socket, risposta, "Errore invio risposta enigma");
@@ -264,6 +274,10 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
             strcat(risposta, lista_comandi[i].handler(socket, opt));
 
             invia_messaggio(socket, risposta, "Errore invio risposta al comando");
+            if(send_both) {
+                invia_messaggio(socket/* TODO prendere altro giocatore */, risposta, "Errore invio risposta al comando");
+                send_both = false;
+            }
             return;
         }
     }   

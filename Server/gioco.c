@@ -5,7 +5,7 @@
 
 static int scenario_scelto = -1;
 static enigma *enigma_attivato = NULL;
-static struct sockaddr_in *giocatore_enigma_attivato = NULL;
+static int giocatore_enigma_attivato = -1;
 static int token = 0;
 
 static scenario *scenari[] = {
@@ -57,11 +57,11 @@ oggetto* cerca_oggetto(char* obj)
     return NULL;
 }
 
-char* attiva_enigma(oggetto *obj, struct sockaddr_in *addr)
+char* attiva_enigma(oggetto *obj, int sock)
 {
     /* TODO finire */
     enigma_attivato = obj->enigma;
-    giocatore_enigma_attivato = addr;
+    giocatore_enigma_attivato = sock;
 
     static char tmp[512] = "Enigma attivato!\n";
     strcat(tmp, obj->enigma->descrizione);
@@ -87,6 +87,23 @@ void prendi_scenari(char *buf)
         sprintf(tmp, "%d: %s. Presenti %d token.\n", i, scenari[i]->nome, scenari[i]->n_token);
         strcat(buf, tmp);
     }
+}
+
+/* Setta lo scenario scelto con id_scenario */
+char* inizia_scenario(int id_scenario)
+{
+    if(id_scenario < 0 || id_scenario >= N_SCENARI) {
+        return "Scenario non disponibile.\n";
+    }
+    scenario_scelto = id_scenario;
+    return "Scenario iniziato, buona fortuna!\n";
+}
+
+char* termina_scenario()
+{
+    /* TODO resettare tutte le variabili dello scenario */
+    scenario_scelto = -1;
+    return "Scenario terminato.\n";
 }
 
 /*  opzione: locazione o oggetto del quale bisogna prendere la descrizione
@@ -119,7 +136,7 @@ char* prendi_descrizione(char *opzione)
     
     Assegna l'oggetto nome_obj al giocatore di indirizzo addr, se non
     già preso. Se l'oggetto ha un enigma viene attivato. */
-char* prendi_oggetto(struct sockaddr_in addr, char *nome_obj)
+char* prendi_oggetto(int sock, char *nome_obj)
 {
     oggetto *obj = cerca_oggetto(nome_obj);
     if(obj == NULL) {
@@ -127,7 +144,7 @@ char* prendi_oggetto(struct sockaddr_in addr, char *nome_obj)
     }
 
     if(obj->enigma != NULL && !obj->enigma->is_risolto) {
-        return attiva_enigma(obj, &addr);
+        return attiva_enigma(obj, sock);
     }
     if(obj->is_bloccato) {
         return "Non puoi prendere questo oggetto!\n";
@@ -137,17 +154,21 @@ char* prendi_oggetto(struct sockaddr_in addr, char *nome_obj)
     }
 
     obj->is_preso = true;
-    obj->addr_possessore = addr;
+    obj->sock_possessore = sock;
     return "Oggetto raccolto!\n";
 }
 
+char* lascia_oggetto(int sock, char *nome_obj)
+{
+    return "TODO";
+}
 /*  addr: indirizzo del giocatore
     nome_obj1: oggetto attivo che deve avere nell'inventario
     nome_obj2: oggetto passivo, può anche essere bloccato
     
     Utilizza l'oggetto nome_obj1 su nome_obj2, solo se nome_obj1 è nell'inventario
     del giocatore che chiama il comando e l'utilizzo è previsto dallo scenario  */
-char* utilizza_oggetti(struct sockaddr_in addr, char *nome_obj1, char *nome_obj2)
+char* utilizza_oggetti(int sock, char *nome_obj1, char *nome_obj2)
 {
     int i;
     scenario *scen = scenari[scenario_scelto];
@@ -164,7 +185,7 @@ char* utilizza_oggetti(struct sockaddr_in addr, char *nome_obj1, char *nome_obj2
     if(!obj1->is_preso) {
         return "Non hai oggetto1 nel tuo inventario.\n";
     }
-    if(!compara_addr(&addr, &obj1->addr_possessore)) {
+    if(sock != obj1->sock_possessore) {
         return "L'altro giocatore ha oggetto1.\n";
     }
     
@@ -180,7 +201,7 @@ char* utilizza_oggetti(struct sockaddr_in addr, char *nome_obj1, char *nome_obj2
             obj1->is_bloccato = true;
             obj1->is_nascosto = true;
             obj1->is_preso = false;
-            memset(&obj1->addr_possessore, 0, sizeof(struct sockaddr_in));
+            obj1->sock_possessore = -1;
             /* sblocco oggetto2 */
             obj2->is_bloccato = false;
             /* assegno un token e guardo se la partita è finita */
@@ -195,7 +216,7 @@ char* utilizza_oggetti(struct sockaddr_in addr, char *nome_obj1, char *nome_obj2
     return "Utilizzo non previsto.\n";
 }
 
-char* prendi_inventario(struct sockaddr_in addr)
+char* prendi_inventario(int sock)
 {
     int i;
     scenario *scen = scenari[scenario_scelto];
@@ -205,23 +226,13 @@ char* prendi_inventario(struct sockaddr_in addr)
     strcat(ret, "Inventario:\n");
     for(i = 0; i < scen->n_oggetti; i++) {
         oggetto *obj = &scen->oggetti[i];
-        if(compara_addr(&addr, &obj->addr_possessore)) {
+        if(sock == obj->sock_possessore) {
             strcat(ret, "- ");
             strcat(ret, obj->nome);
             strcat(ret, "\n");
         }
     }
     return ret;
-}
-
-/* Setta lo scenario scelto con id_scenario */
-char* inizia_scenario(int id_scenario)
-{
-    if(id_scenario < 0 || id_scenario >= N_SCENARI) {
-        return "Scenario non disponibile.\n";
-    }
-    scenario_scelto = id_scenario;
-    return "Scenario iniziato, buona fortuna!\n";
 }
 
 /*  risposta: risposta che ha dato il giocatore all'enigma
@@ -243,7 +254,7 @@ char* risolvi_enigma(char *risposta)
         strcpy(tmp, enigma_attivato->messaggio_risoluzione);
     }
     enigma_attivato = NULL;
-    giocatore_enigma_attivato = NULL;
+    giocatore_enigma_attivato = -1;
     return tmp;
 }
 
@@ -263,9 +274,9 @@ bool reset_scenario(int id_scenario)
     return true;
 }
 
-bool is_risposta_enigma(struct sockaddr_in addr)
+bool is_risposta_enigma(int sock)
 {
-    return enigma_attivato != NULL && compara_addr(&addr, giocatore_enigma_attivato);
+    return enigma_attivato != NULL && sock == giocatore_enigma_attivato;
 }
 
 /* Ritorna true se è stato scelto uno scenario e dunque è in corso una partita */
