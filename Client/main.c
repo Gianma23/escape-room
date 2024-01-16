@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
                     ret = ricevi_messaggio(cl_sock, buffer, "Errore in fase di ricezione");
                     if(ret == 0) {
                         printf("Connessione chiusa dal server.\n");
+                        close(cl_sock);
                         exit(0);
                     }
                     printf("%s", buffer);
@@ -83,6 +84,7 @@ int main(int argc, char *argv[])
                     ret = ricevi_messaggio(cl_sock, buffer, "Errore in fase di ricezione");
                     if(ret == 0) {
                         printf("Connessione chiusa dal server.\n");
+                        close(cl_sock);
                         exit(0);
                     }
                     printf("%s", buffer);

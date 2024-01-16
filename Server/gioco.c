@@ -392,6 +392,7 @@ char* elimina_gruppo()
         return "Gruppo non esistente, impossibile eliminare.\n";
     }
     giocatori.attivo = false;
+    giocatori.indirizzi[0] = giocatori.indirizzi[1] = -1;
     giocatori.num_giocatori = 0;
     return "Gruppo eliminato con successo.\n";
 }
