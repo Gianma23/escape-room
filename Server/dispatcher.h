@@ -4,8 +4,7 @@
 #include <netinet/in.h>
 #include "../utility.h"
 
-#define N_COMANDI_SERVER 1
-#define N_COMANDI_CLIENT 11
+#define N_COMANDI 11
 #define COMANDO_DIM 64
 
 typedef struct comando {

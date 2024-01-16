@@ -386,7 +386,25 @@ char* entra_gruppo(int sock)
     return "Gruppo completo! In attesa che il creatore inizi lo scenario.\n";
 }
 
+char* elimina_gruppo()
+{
+    if(!giocatori.attivo) {
+        return "Gruppo non esistente, impossibile eliminare.\n";
+    }
+    giocatori.attivo = false;
+    giocatori.num_giocatori = 0;
+    return "Gruppo eliminato con successo.\n";
+}
+
 int prendi_giocatore2()
 {
     return giocatori.indirizzi[1];
+}
+
+int prendi_altro_giocatore(int sock)
+{
+    if(giocatori.indirizzi[0] == sock) {
+        return giocatori.indirizzi[1];
+    }
+    return giocatori.indirizzi[0];
 }

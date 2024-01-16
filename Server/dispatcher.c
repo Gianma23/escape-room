@@ -170,20 +170,9 @@ char* handler_end(int cl_sock, char *opt)
     return termina_scenario(cl_sock);
 }
 
-char* handler_stop(int cl_sock, char* opt)
-{
-    printf("Chiusura server...\n");
-    close(cl_sock);
-    int sock_giocatore2 = prendi_giocatore2();
-    if(sock_giocatore2 != -1) {
-        close(sock_giocatore2);
-    }
-    exit(0);
-}
-
 /* COMANDI =============== */
 
-static const comando lista_comandi_client[] = {
+static const comando lista_comandi[] = {
     {"register", handler_register, " <username> <password>\tregistra un nuovo account"},
     {"login", handler_login, " <username> <password>\taccedi con un account"},
     {"startgroup", handler_startgroup, "\t\t\tinizializza un gruppo di gioco"},
@@ -196,10 +185,6 @@ static const comando lista_comandi_client[] = {
     {"use", handler_use, "<oggetto1> <oggetto2>\tutilizza l'oggetto1 su oggetto2"},
     {"objs", handler_objs, "\t\t\t\tmostra il tuo inventario"},
     {"end", handler_end, "\t\t\t\ttermina la partita. Se è avviato un gruppo termina per tutti"}
-};
-
-static const comando lista_comandi_server[] = {
-    {"stop", handler_stop}
 };
 
 /* IMPLEMENTAZIONE FUNZIONI INTERFACCIA ============ */
@@ -219,8 +204,6 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
     char *com;
     char risposta[512];
     char invio[1024];
-    const int N_COMANDI = strcmp(soggetto, "server") == 0 ? N_COMANDI_SERVER : N_COMANDI_CLIENT;
-    const comando *lista_comandi = strcmp(soggetto, "server") == 0 ? lista_comandi_server : lista_comandi_client;
     memset(risposta, 0, sizeof(risposta));
     memset(invio, 0, sizeof(invio));
 
@@ -270,12 +253,12 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
 
             invia_messaggio(socket, invio, "Errore invio risposta al comando");
             if(get_send_both()) {
-                invia_messaggio(prendi_giocatore2(), invio, "Errore invio risposta al comando");
+                invia_messaggio(prendi_altro_giocatore(socket), invio, "Errore invio risposta al comando");
                 set_send_both(false);
             }
             return;
         }
-    }   
+    }
     printf("comando non trovato.\n");
     if(strcmp(soggetto, "client") == 0) {
         invia_messaggio(socket, "comando non trovato.\n", "Errore invio risposta comando non trovato");
@@ -288,8 +271,8 @@ void comandi_client(char* buf)
     int i;
     strcpy(buf, "Lista comandi disponibili:\n");
     char tmp[1024];
-    for(i = 0; i < N_COMANDI_CLIENT; i++) {
-        sprintf(tmp, "\t%s%s\n", lista_comandi_client[i].nome, lista_comandi_client[i].descrizione);
+    for(i = 0; i < N_COMANDI; i++) {
+        sprintf(tmp, "\t%s%s\n", lista_comandi[i].nome, lista_comandi[i].descrizione);
         strcat(buf, tmp);
     }
 }

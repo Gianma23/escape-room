@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
     in_port_t porta = htons(atoi(argv[1]));
     char buffer[BUFFER_DIM] = "";
     int list_sock, comm_sock;
+    int sock_giocatore;
     char input[6];
 
     printf("======================================================\n"
@@ -96,7 +97,12 @@ int main(int argc, char *argv[])
                 /* stdin */
                 if(i == STDIN_FILENO) {
                     scanf("%s", buffer);
-                    command_dispatcher(i, buffer, "server");
+                    if (strcmp(buffer, "stop") != 0) {
+                        printf("Comando server non riconosciuto.\n");
+                        continue;
+                    }
+                    printf("Chiusura server...\n");
+                    exit(0);
                 }
                 /* socket di ascolto */
                 else if(i == list_sock) {
@@ -126,14 +132,27 @@ int main(int argc, char *argv[])
                 else {
                     ret = ricevi_messaggio(i, buffer, "Errore ricezione comando dal client\n");
                     if(ret == 0) {
-                        printf("Sconnessione client in corso...\n");
-                        /* printf("%s", logout_user(i)); */
-                        /* TODO: funzione reset scenario, gruppo e logout di tutti */
+                        printf("Sconnessione socket %d in corso...\n", i);
+                        printf("%s", logout_user(i));
                         close(i);
                         printf("Socket %d chiuso.\n", i);
                         FD_CLR(i, &master);
-                        printf("Socket rimosso dal set dei descrittori.\n"
-                               "Sconnessione client effettuata con successo.\n\n");
+                        printf("Socket %d rimosso dal set dei descrittori.\n"
+                               "Sconnessione client effettuata con successo.\n\n", i);
+                               
+                        /* sconnetto anche l'altro giocatore se presente */
+                        if((sock_giocatore = prendi_altro_giocatore(i)) != -1) {
+                            printf("Presente gruppo, disconnessione altro giocatore...");
+                            printf("%s", logout_user(sock_giocatore));
+                            close(sock_giocatore);
+                            printf("Socket %d chiuso.\n", sock_giocatore);
+                            FD_CLR(sock_giocatore, &master);
+                            printf("Socket %d rimosso dal set dei descrittori.\n"
+                                    "Sconnessione client effettuata con successo.\n\n", sock_giocatore);
+                            printf("%s\n", elimina_gruppo());
+                        }
+                        reset_scenario();
+                        printf("Reset dello scenario effettuato.\n\n");
                         continue;
                     }
                     

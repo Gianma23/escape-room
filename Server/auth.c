@@ -148,7 +148,6 @@ char* logout_user(int cl_sock)
 bool is_logged(int cl_sock)
 {
     int i;
-    /* TODO: se si disconnette un giocatore il gioco finisce */
     for(i = 0; i < num_login; i++) {
         if(cl_sock == loggati[i].sock) {
             return true;
