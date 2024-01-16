@@ -20,8 +20,6 @@ typedef struct oggetto {
     char *descrizione_bloccato;
     char *descrizione_sbloccato;
     char *descrizione_locazione;
-    /* TODO aggiungere booleano is_prendibile: cosicche quando si sblocca un oggetto
-        grazie ad una use o un enigma è comunque non prendibile */
     /* se è bloccato non può essere preso */
     bool is_bloccato;
     bool is_preso;
@@ -52,9 +50,11 @@ typedef struct scenario {
     int n_oggetti;
     int n_locazioni;
     int n_utilizzi;
+    int n_enigmi;
     oggetto *oggetti;
     locazione *locazioni;
     utilizzo *utilizzi;
+    enigma *enigmi;
     int n_token;
     int n_bloccati;
     int n_nascosti;

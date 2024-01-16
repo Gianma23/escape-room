@@ -3,7 +3,7 @@
 #include "cimitero.h"
 
 oggetto oggetti_cimitero[];
-/* TODO finire enigmi */
+
 enigma enigmi_cimitero[] = {
     {"Scopri la parola scritta sulla pagina:\n", "crepuscolo", false, /* enigma libro */
      "Hai indovinato la parola! Sull'altare si è aperto un cassetto.\n",
@@ -154,9 +154,11 @@ scenario scenario_cimitero = {
     N_OGGETTI_CIMITERO, 
     N_LOCAZIONI_CIMITERO,
     N_UTILIZZI_CIMITERO,
+    N_ENIGMI_CIMITERO,
     oggetti_cimitero,
     locazioni_cimitero,
     utilizzi_cimitero,
+    enigmi_cimitero,
     N_TOKEN_CIMITERO,
     N_BLOCCATI_CIMITERO,
     N_NASCOSTI_CIMITERO

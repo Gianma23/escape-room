@@ -178,7 +178,16 @@ char* prendi_oggetto(int sock, char *nome_obj)
 
 char* lascia_oggetto(int sock, char *nome_obj)
 {
-    return "TODO";
+    oggetto *obj = cerca_oggetto(nome_obj);
+    if(obj == NULL || obj->is_nascosto) {
+        return "Oggetto non trovato.\n";
+    }
+    if(!obj->is_preso) {
+        return "Non hai questo oggetto nel tuo inventario.\n";
+    }
+    obj->is_preso = true;
+    obj->sock_possessore = sock;
+    return "Oggetto lasciato dove lo avevi raccolto.\n";
 }
 
 /*  addr: indirizzo del giocatore
@@ -216,7 +225,6 @@ char* utilizza_oggetti(int sock, char *nome_obj1, char *nome_obj2)
                 util->oggetto_nascosto->is_bloccato = false;
                 util->oggetto_nascosto->is_nascosto = false;
             }
-            /* TODO sistemare bloccato e prendibile obj2 */
             /* blocco oggetto1 */
             obj1->is_nascosto = true;
             obj1->is_preso = false;
@@ -305,7 +313,6 @@ bool reset_scenario()
     const scenario *scen = scenari[scenario_scelto];
     for(i = 0; i < scen->n_oggetti; i++) {
         oggetto *obj = &scen->oggetti[i];
-        /* TODO resettare is_prendibile */
         if(i < scen->n_bloccati) {
             obj->is_bloccato = true;
             obj->is_nascosto = false;
@@ -321,7 +328,9 @@ bool reset_scenario()
         obj->is_preso = false;
         obj->sock_possessore = -1;
     }
-    /* TODO reset enigmi a non fatti */
+    for(i = 0; i < scen->n_enigmi; i++) {
+        scen->enigmi[i].is_risolto = false;
+    }
     scenario_scelto = -1;
     return true;
 }

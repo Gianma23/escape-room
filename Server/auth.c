@@ -72,7 +72,6 @@ char* login_user(char* opt, int cl_sock)
     if(user == NULL) {
         return "Parametri non sufficienti.\n";
     }
-    
     password = strtok(NULL, " ");
     if(password == NULL) {
         return "Parametri non sufficienti.\n";
@@ -81,7 +80,14 @@ char* login_user(char* opt, int cl_sock)
         return "Troppi parametri.\n";
     }
         
-    /* TODO controlli input dimensioni */
+    /* controlli dimensioni input */
+    if(strlen(user) > USER_DIM) {
+        return "Username troppo lungo.\n";
+    }
+    if(strlen(password) > PASSWORD_DIM) {
+        return "Password troppo lunga.\n";
+    }
+
     if(num_login == MAX_GIOCATORI_GRUPPO) {
         return "Raggiunto il massimo numero di persone loggate insieme.\n";
     }
