@@ -153,8 +153,6 @@ char* handler_objs(int cl_sock, char* opt)
     return prendi_inventario(cl_sock);
 }
 
-/*  termina lo scenario, resettandolo. Se è presente un gruppo, non
-    viene eliminato */
 char* handler_end(int cl_sock, char *opt)
 {
     if(!is_logged(cl_sock)) {
