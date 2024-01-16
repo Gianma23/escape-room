@@ -7,10 +7,10 @@ oggetto oggetti_cimitero[];
 enigma enigmi_cimitero[] = {
     {"Scopri la parola scritta sulla pagina:\n", "crepuscolo", false, /* enigma libro */
      "Hai indovinato la parola! Sull'altare si è aperto un cassetto.\n",
-     &oggetti_cimitero[7]}, 
+     &oggetti_cimitero[6]}, 
     {"Indovinello:\n", "la spada", false, /* enigma scritta rovinata */
      "Bravo, hai indovinato! La terra si smuove e vedi qualcosa sbucare dalla tomba.\n",
-     &oggetti_cimitero[8]} 
+     &oggetti_cimitero[7]} 
 };
 
 oggetto oggetti_cimitero[] = {
@@ -18,34 +18,25 @@ oggetto oggetti_cimitero[] = {
      "Sembra che serva una chiave per aprirlo...\n",
      "Il lucchetto è sbloccato adesso.\n",
      "C'è un **lucchetto** che lo blocca.\n",
-     true, false, false, NULL
+     true, false, false, NULL, -1
     },
     {"scatola",
      "Una scatola di metallo arrugginita, c'è un buco a forma di triangolo sopra.\n",
      "La scatola è aperta, al suo interno c'è una **chiave**.\n",
      "Ai suoi piedi c'è una **scatola**.\n",
-     true, false, false, NULL
-    },
-    {"foglietto",
-     "",
-     "-----------\n"
-     " -       - \n"
-     "  -p*sc*-  \n"
-     "   -----   \n",
-     "All'interno c'è un **foglietto**.\n",
-     false, false, false, NULL
+     true, false, false, NULL, -1
     },
     {"statua",
      "Una statua di un angelo, ha le mani pronte a ricevere qualcosa.\n",
      "Ai piedi della statua si è aperto un vano con una **gemma** dentro.\n",
      "Dietro c'è una **statua**.\n",
-     true, false, false, NULL
+     true, false, false, NULL, -1
     },
     {"libro",
-     "", 
-     "Il libro è molto vecchio, c'è una **pagina_strappata**.\n",
+     "Il libro è molto vecchio, c'è una **pagina_strappata**.\n", 
+     "",
      "Accanto c'è un **libro**.\n",
-     true, false, false, NULL
+     true, false, false, NULL, -1
     },
     {"pagina_strappata",
      "|------         ---|\n"
@@ -80,25 +71,34 @@ oggetto oggetti_cimitero[] = {
      "",
      "Una torcia a raggi UV. È in grado di rivelare scritte nascoste.\n",
      "C'è un cassetto aperto, all'interno c'è una **torcia_UV**.\n",
-     false, false, true, NULL
+     false, false, true, NULL, -1
     },
     {"spada",
      "",
      "Una spada lucente, è molto pesante.\n",
      "Dalla terra spunta il manico di una **spada**.\n",
-     false, false, true, NULL
+     false, false, true, NULL, -1
     },
     {"gemma",
      "",
      "Una gemma rossa di forma triangolare.\n",
      "",
-     false, false, true, NULL
+     false, false, true, NULL, -1
     },
     {"chiave",
      "",
      "Una chiave argentata.\n",
      "",
-     false, false, true, NULL
+     false, false, true, NULL, -1
+    },
+    {"foglietto",
+     "",
+     "-----------\n"
+     " -       - \n"
+     "  -p*sc*-  \n"
+     "   -----   \n",
+     "All'interno c'è un **foglietto**.\n",
+     false, false, false, NULL, -1
     }
 };
 
@@ -113,7 +113,7 @@ utilizzo utilizzi_cimitero[] = {
     },
     {"spada", "statua", 
      "Posi la spada sulle mani della statua. Si apre un vano ai suoi piedi.\n",
-     NULL, true
+     &oggetti_cimitero[9], true
     },
     {"gemma", "scatola",
      "La gemma si incastra perfettamente nel buco nella scatola, sembra che si sia aperta.\n",
@@ -134,16 +134,16 @@ locazione locazioni_cimitero[] = {
      1, {&oggetti_cimitero[1]}},
     {"buco",
      "Riesci a malapena a vedere cosa ci sia dentro. ",
-     1, {&oggetti_cimitero[2]}},
+     1, {&oggetti_cimitero[10]}},
     {"chiesa",
      "La chiesa all'interno è tetra e fai fatica a vedere. Intravedi un ++altare++. ",
-     1, {&oggetti_cimitero[3]}},
+     1, {&oggetti_cimitero[2]}},
     {"altare",
      "L'altare è illuminato da una fioca luce. ",
-     2, {&oggetti_cimitero[4], &oggetti_cimitero[7]}},
+     2, {&oggetti_cimitero[3], &oggetti_cimitero[6]}},
     {"tomba",
      "La tomba è malcurata e cade a pezzi. ",
-     1, {&oggetti_cimitero[5]} /* TODO mettere spada */},
+     2, {&oggetti_cimitero[4], &oggetti_cimitero[7]}},
 };
 
 scenario scenario_cimitero = {
@@ -157,5 +157,7 @@ scenario scenario_cimitero = {
     oggetti_cimitero,
     locazioni_cimitero,
     utilizzi_cimitero,
-    N_TOKEN_CIMITERO
+    N_TOKEN_CIMITERO,
+    N_BLOCCATI_CIMITERO,
+    N_NASCOSTI_CIMITERO
 };

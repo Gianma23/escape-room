@@ -8,6 +8,7 @@ static enigma *enigma_attivato = NULL;
 static int giocatore_enigma_attivato = -1;
 static int token = 0;
 static gruppo giocatori;
+static bool send_both = false;
 
 static scenario *scenari[] = {
     &scenario_cimitero
@@ -60,7 +61,9 @@ oggetto* cerca_oggetto(char* obj)
 
 char* attiva_enigma(oggetto *obj, int sock)
 {
-    /* TODO finire */
+    if(enigma_attivato != NULL) {
+        return "L'altro giocatore sta risolvendo l'enigma!\n";
+    }
     enigma_attivato = obj->enigma;
     giocatore_enigma_attivato = sock;
 
@@ -91,7 +94,7 @@ void prendi_scenari(char *buf)
 }
 
 /* Setta lo scenario scelto con id_scenario */
-char* inizia_scenario(int sock, int id_scenario, bool *send_both)
+char* inizia_scenario(int sock, int id_scenario)
 {
     if(id_scenario < 0 || id_scenario >= N_SCENARI) {
         return "Scenario non disponibile.\n";
@@ -103,22 +106,21 @@ char* inizia_scenario(int sock, int id_scenario, bool *send_both)
         return "Gruppo avviato, lo scenario può partire solo se il gruppo è pieno.\n";
     }
     if(giocatori.attivo) {
-        *send_both = true;
+        set_send_both(true);
     }
     scenario_scelto = id_scenario;
     return "Scenario iniziato, buona fortuna!\n";
 }
 
-char* termina_scenario(int sock, bool *send_both)
+char* termina_scenario(int sock)
 {
     if(giocatori.attivo && giocatori.indirizzi[0] != sock) {
         return "Solo l'owner del gruppo può terminare uno scenario.\n";
     }
     if(giocatori.attivo) {
-        *send_both = true;
+        set_send_both(true);
     }
-    /* TODO resettare tutte le variabili dello scenario */
-    scenario_scelto = -1;
+    reset_scenario();
     return "Scenario terminato.\n";
 }
 
@@ -162,7 +164,7 @@ char* prendi_oggetto(int sock, char *nome_obj)
     if(obj->enigma != NULL && !obj->enigma->is_risolto) {
         return attiva_enigma(obj, sock);
     }
-    if(obj->is_bloccato) {
+    if(obj->is_bloccato || obj->enigma != NULL) {
         return "Non puoi prendere questo oggetto!\n";
     }
     if(obj->is_preso) {
@@ -178,6 +180,7 @@ char* lascia_oggetto(int sock, char *nome_obj)
 {
     return "TODO";
 }
+
 /*  addr: indirizzo del giocatore
     nome_obj1: oggetto attivo che deve avere nell'inventario
     nome_obj2: oggetto passivo, può anche essere bloccato
@@ -213,17 +216,23 @@ char* utilizza_oggetti(int sock, char *nome_obj1, char *nome_obj2)
                 util->oggetto_nascosto->is_bloccato = false;
                 util->oggetto_nascosto->is_nascosto = false;
             }
+            /* TODO sistemare bloccato e prendibile obj2 */
             /* blocco oggetto1 */
-            obj1->is_bloccato = true;
             obj1->is_nascosto = true;
             obj1->is_preso = false;
             obj1->sock_possessore = -1;
             /* sblocco oggetto2 */
             obj2->is_bloccato = false;
             /* assegno un token e guardo se la partita è finita */
-            token++;
+            if(util->has_token) {
+                token++; 
+            }
             if(is_game_ended()) {
-                /* TODO vittoria, resetta il gioco */
+                if(giocatori.attivo) {
+                    set_send_both(true);
+                }
+                reset_scenario();
+                return "Lo scenario è stato completato, congratulazioni!\n";
             }
             strcat(ret, util->messaggio);
             return ret;
@@ -255,7 +264,7 @@ char* prendi_inventario(int sock)
     ATTENZIONE: non controlla se c'è un enigma realmente attivo */
 char* risolvi_enigma(char *risposta)
 {
-    static char tmp[32];
+    static char tmp[256];
     if(strcmp(risposta, enigma_attivato->soluzione) != 0) {
         strcpy(tmp, "Soluzione errata.\n");
     }
@@ -265,8 +274,12 @@ char* risolvi_enigma(char *risposta)
         enigma_attivato->is_risolto = true;
         token++;
         if(is_game_ended()) {
-            /* TODO vittoria, resetta il gioco */
-        }
+                if(giocatori.attivo) {
+                    set_send_both(true);
+                }
+                reset_scenario();
+                return "Lo scenario è stato completato, congratulazioni!\n";
+            }
         strcpy(tmp, enigma_attivato->messaggio_risoluzione);
     }
     enigma_attivato = NULL;
@@ -280,12 +293,35 @@ int token_rimasti()
 }
 
 /* Resetta lo scenario id_scenario ai valori di default */
-bool reset_scenario(int id_scenario)
+bool reset_scenario()
 {
-    if(id_scenario < 0 || id_scenario >= N_SCENARI) {
+    if(scenario_scelto == -1) {
         return false;
     }
-    /* TODO:  resettare per ogni oggetto le impostazioni di default */
+    if(giocatori.attivo) {
+        set_send_both(true);
+    }
+    int i;
+    const scenario *scen = scenari[scenario_scelto];
+    for(i = 0; i < scen->n_oggetti; i++) {
+        oggetto *obj = &scen->oggetti[i];
+        /* TODO resettare is_prendibile */
+        if(i < scen->n_bloccati) {
+            obj->is_bloccato = true;
+            obj->is_nascosto = false;
+        }
+        else if(i < (scen->n_bloccati + scen->n_nascosti)) {
+            obj->is_bloccato = false;
+            obj->is_nascosto = true;
+        }
+        else {
+            obj->is_bloccato = false;
+            obj->is_nascosto = false;
+        }
+        obj->is_preso = false;
+        obj->sock_possessore = -1;
+    }
+    /* TODO reset enigmi a non fatti */
     scenario_scelto = -1;
     return true;
 }
@@ -299,6 +335,16 @@ bool is_risposta_enigma(int sock)
 bool is_game_started()
 {
     return scenario_scelto != -1;
+}
+
+bool get_send_both()
+{
+    return send_both;
+}
+
+void set_send_both(bool value)
+{
+    send_both = value;
 }
 
 /* INTERFACCIA GRUPPO */
@@ -315,7 +361,7 @@ char* avvia_gruppo(int sock)
     return "Gruppo per la stanza creato con successo!\n";
 }
 
-char* entra_gruppo(int sock, bool * send_both)
+char* entra_gruppo(int sock)
 {
     if(!giocatori.attivo) {
         return "Gruppo non esistente, impossibile entrare.\n";
@@ -327,7 +373,7 @@ char* entra_gruppo(int sock, bool * send_both)
         return "Sei già nel gruppo!\n";
     }
     giocatori.indirizzi[giocatori.num_giocatori++] = sock;
-    *send_both = true;
+    set_send_both(true);
     return "Gruppo completo! In attesa che il creatore inizi lo scenario.\n";
 }
 

@@ -20,6 +20,8 @@ typedef struct oggetto {
     char *descrizione_bloccato;
     char *descrizione_sbloccato;
     char *descrizione_locazione;
+    /* TODO aggiungere booleano is_prendibile: cosicche quando si sblocca un oggetto
+        grazie ad una use o un enigma è comunque non prendibile */
     /* se è bloccato non può essere preso */
     bool is_bloccato;
     bool is_preso;
@@ -54,6 +56,8 @@ typedef struct scenario {
     locazione *locazioni;
     utilizzo *utilizzi;
     int n_token;
+    int n_bloccati;
+    int n_nascosti;
 } scenario;
 typedef struct gruppo {
     bool attivo;
@@ -63,8 +67,9 @@ typedef struct gruppo {
 
 /* funzioni gioco */
 void prendi_scenari(char *);
-char* inizia_scenario(int, int, bool *);
-char* termina_scenario(int, bool *);
+char* inizia_scenario(int, int);
+char* termina_scenario(int);
+bool reset_scenario();
 char* prendi_descrizione(char *);
 char* prendi_inventario(int);
 char* prendi_oggetto(int, char *);
@@ -74,10 +79,12 @@ char* risolvi_enigma(char *);
 int token_rimasti();
 bool is_game_started();
 bool is_risposta_enigma(int);
+bool get_send_both();
+void set_send_both(bool);
 
 /* funzioni gruppo */
 char* avvia_gruppo(int);
-char* entra_gruppo(int, bool *);
+char* entra_gruppo(int);
 int prendi_giocatore2();
 
 #endif

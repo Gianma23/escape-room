@@ -8,9 +8,6 @@
 #include "gioco.h"
 #include "timer.h"
 
-/* settata a true quando si vuole mandare il messaggio a tutti i giocatori */
-static bool send_both = false;
-
 /* ===================== HANDLERS ===================== */
 /*  cl_sock: socket del client che ha invocato il comando
     opt: opzioni del comando */
@@ -33,7 +30,9 @@ char* handler_startgroup(int cl_sock, char* opt)
     if(is_game_started()) {
         return "Impossibile creare il gruppo, è già in corso uno scenario.\n";
     }
-    /* TODO controllare che non ci siano troppi argomenti, anche per le altre funzioni */
+    if(strtok(opt, " ") != NULL) {
+        return "Troppi parametri.\n";
+    }
     return avvia_gruppo(cl_sock);
 }
 
@@ -42,7 +41,7 @@ char* handler_joingroup(int cl_sock, char* opt)
     if(!is_logged(cl_sock)) {
         return "Non sei loggato!\n";
     }
-    return entra_gruppo(cl_sock, &send_both);
+    return entra_gruppo(cl_sock);
 }
 
 char* handler_start(int cl_sock, char* opt)
@@ -62,8 +61,8 @@ char* handler_start(int cl_sock, char* opt)
     if(strtok(NULL, " ") != NULL) {
         return "Troppi parametri.\n";
     }
-    start_timer(600); /* 10 min di tempo per completare lo scenario */
-    return inizia_scenario(cl_sock, id_scenario, &send_both);
+    start_timer(1200); /* 20 min di tempo per completare lo scenario */
+    return inizia_scenario(cl_sock, id_scenario);
 }
 
 char* handler_look(int cl_sock, char* opt) 
@@ -148,9 +147,14 @@ char* handler_objs(int cl_sock, char* opt)
     if(!is_game_started()) {
         return "Nessuno scenario iniziato. Fare prima start <stanza>\n";
     }
+    if(strtok(opt, " ") != NULL) {
+        return "Troppi parametri.\n";
+    }
     return prendi_inventario(cl_sock);
 }
 
+/*  termina lo scenario, resettandolo. Se è presente un gruppo, non
+    viene eliminato */
 char* handler_end(int cl_sock, char *opt)
 {
     if(!is_logged(cl_sock)) {
@@ -159,7 +163,10 @@ char* handler_end(int cl_sock, char *opt)
     if(!is_game_started()) {
         return "Nessuno scenario iniziato.\n";
     }
-    return termina_scenario(cl_sock, &send_both);
+    if(strtok(opt, " ") != NULL) {
+        return "Troppi parametri.\n";
+    }
+    return termina_scenario(cl_sock);
 }
 
 char* handler_stop(int cl_sock, char* opt)
@@ -209,21 +216,13 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
     int time;
     char *opt;
     char *com;
-    char risposta[1024];
+    char risposta[512];
+    char invio[1024];
     const int N_COMANDI = strcmp(soggetto, "server") == 0 ? N_COMANDI_SERVER : N_COMANDI_CLIENT;
     const comando *lista_comandi = strcmp(soggetto, "server") == 0 ? lista_comandi_server : lista_comandi_client;
     memset(risposta, 0, sizeof(risposta));
-    
-    /* TODO rivedere controllo se enigma è attivo, contando il multiplayer */
-    /* se il comando è arrivato da un giocatore con un enigma attivo, 
-       l'input deve essere visto come la risposta all'enigma */
-    if(is_risposta_enigma(socket)) {
-        com = strtok(buffer, "\n");
-        strcat(risposta, risolvi_enigma(com));
-        invia_messaggio(socket, risposta, "Errore invio risposta enigma");
-        return;
-    }
-    
+    memset(invio, 0, sizeof(invio));
+
     /* cerco il comando nella lista dei comandi */
     com = strtok(buffer, " ");
     for(i = 0; i < N_COMANDI; i++) {
@@ -236,21 +235,31 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
                 *opt = '\0';
             }
 
-           /* TODO fare questo controllo sempre (portarlo fuori dal for) */ 
+            /* gioco finito */
             if(is_game_started() && (time = remaining_time()) <= 0) {
-                strcpy(risposta, "Tempo scaduto! Il gioco è finito.\n");
-                /* TODO: reset gioco */
+                strcpy(buffer, "Tempo scaduto! Il gioco è finito.\n");
+                reset_scenario();
             }
-            else if(is_game_started()){
-                sprintf(risposta, "- Rimanenti %d minuti e %d secondi.\n"
-                                  "- Token rimasti da trovare: %d\n\n", time/60, time%60, token_rimasti());
+            else {
+                if(is_risposta_enigma(socket)) {
+                    com = strtok(buffer, "\n");
+                    strcpy(risposta, risolvi_enigma(com));
+                }
+                else {
+                    strcpy(risposta, lista_comandi[i].handler(socket, opt));
+                }
+                /* header per quando c'è uno scenario iniziato */
+                if(is_game_started()){
+                    sprintf(invio, "- Rimanenti %d minuti e %d secondi.\n"
+                                        "- Token rimasti da trovare: %d\n\n", time/60, time%60, token_rimasti());
+                }
+                strcat(invio, risposta);
             }
-            strcat(risposta, lista_comandi[i].handler(socket, opt));
 
-            invia_messaggio(socket, risposta, "Errore invio risposta al comando");
-            if(send_both) {
-                invia_messaggio(prendi_giocatore2(), risposta, "Errore invio risposta al comando");
-                send_both = false;
+            invia_messaggio(socket, invio, "Errore invio risposta al comando");
+            if(get_send_both()) {
+                invia_messaggio(prendi_giocatore2(), invio, "Errore invio risposta al comando");
+                set_send_both(false);
             }
             return;
         }
