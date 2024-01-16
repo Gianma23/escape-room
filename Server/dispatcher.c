@@ -130,9 +130,12 @@ char* handler_use(int cl_sock, char* opt)
     
     char* obj1 = strtok(opt, " ");
     if(obj1 == NULL) {
-        return "Specificare almeno un oggetto da usare.\n";
+        return "Nessun oggetto specificato.\n";
     }
     char* obj2 = strtok(NULL, " ");
+    if(obj2 == NULL) {
+        return "Specificare l'oggetto su cui utilizzare l'oggetto specificato.\n";
+    }
     if(strtok(NULL, " ") != NULL) {
         return "Troppi parametri.\n";
     }
@@ -221,9 +224,25 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
     memset(risposta, 0, sizeof(risposta));
     memset(invio, 0, sizeof(invio));
 
+    if(is_risposta_enigma(socket)) {
+        com = strtok(buffer, "\n");
+        strcpy(risposta, risolvi_enigma(com));
+        /* header messaggio enigma */
+        time = remaining_time();
+        sprintf(invio, "- Rimanenti %d minuti e %d secondi.\n"
+                        "- Token rimasti da trovare: %d\n\n", time/60, time%60, token_rimasti());
+        strcat(invio, risposta);
+        invia_messaggio(socket, invio, "Errore invio risposta al comando");
+        return;
+    }
+
     /* cerco il comando nella lista dei comandi */
     com = strtok(buffer, " ");
     for(i = 0; i < N_COMANDI; i++) {
+        /* stringa vuota */
+        if(com == NULL) {
+            break;
+        }
         if(strcmp(com, lista_comandi[i].nome) == 0) {
             printf("comando trovato.\n");
             opt = strtok(NULL, "\0");
@@ -234,22 +253,17 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
             }
 
             /* gioco finito */
-            if(is_game_started() && (time = remaining_time()) <= 0) {
+            if(is_game_started() && (remaining_time()) <= 0) {
                 strcpy(buffer, "Tempo scaduto! Il gioco è finito.\n");
                 reset_scenario();
             }
             else {
-                if(is_risposta_enigma(socket)) {
-                    com = strtok(buffer, "\n");
-                    strcpy(risposta, risolvi_enigma(com));
-                }
-                else {
-                    strcpy(risposta, lista_comandi[i].handler(socket, opt));
-                }
+                strcpy(risposta, lista_comandi[i].handler(socket, opt));
                 /* header per quando c'è uno scenario iniziato */
                 if(is_game_started()){
+                    time = remaining_time();
                     sprintf(invio, "- Rimanenti %d minuti e %d secondi.\n"
-                                        "- Token rimasti da trovare: %d\n\n", time/60, time%60, token_rimasti());
+                                   "- Token rimasti da trovare: %d\n\n", time/60, time%60, token_rimasti());
                 }
                 strcat(invio, risposta);
             }

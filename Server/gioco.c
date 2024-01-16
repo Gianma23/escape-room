@@ -157,11 +157,11 @@ char* prendi_descrizione(char *opzione)
 char* prendi_oggetto(int sock, char *nome_obj)
 {
     oggetto *obj = cerca_oggetto(nome_obj);
-    if(obj == NULL) {
+    if(obj == NULL || obj->is_nascosto) {
     return "Oggetto non trovato.\n";
     }
 
-    if(obj->enigma != NULL && !obj->enigma->is_risolto) {
+    if(obj->enigma != NULL && !obj->enigma->is_risolto && !obj->is_bloccato) {
         return attiva_enigma(obj, sock);
     }
     if(obj->is_bloccato || obj->enigma != NULL) {
