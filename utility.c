@@ -19,7 +19,7 @@ int invia_messaggio(int p_socket, char* p_messaggio, char* p_errore)
     ret = send(p_socket, &lmsg, sizeof(uint16_t), 0);
     if(ret < 0){
         strcpy(err, p_errore);
-        perror(strcat(err, " (lunghezza)\n"));
+        perror(strcat(err, " (invio lunghezza)"));
         return ret;
     }
     if(ret == 0) {
@@ -29,35 +29,35 @@ int invia_messaggio(int p_socket, char* p_messaggio, char* p_errore)
     ret = send(p_socket, p_messaggio, len, 0);
     if(ret < 0){
         strcpy(err, p_errore);
-        perror(strcat(err, "\n"));
-        return ret;
+        perror(strcat(err, " (invio messaggio)"));
     }
     return ret;
 }
 
 int ricevi_messaggio(int p_socket, char* p_messaggio, char* p_errore){
     int ret;
+    char err[256];
     uint16_t lmsg;
     size_t len;
 
+    /* Ricezione della lunghezza del messaggio */
     ret = recv(p_socket, &lmsg, sizeof(uint16_t), 0);
     if(ret < 0){
-        perror(strcat(p_errore, " (lunghezza)\n"));
+        strcpy(err, p_errore);
+        perror(strcat(err, " (ricezione lunghezza)"));
         return ret;
     }
     if(ret == 0) {
         return  ret;
     }
-				
     /* Conversione in formato 'host' */
     len = ntohs(lmsg);
 
     /* Ricezione del messaggio */
     ret = recv(p_socket, p_messaggio, len, 0);
-
     if(ret < 0){
-        perror("Errore in fase di ricezione comando da un qualche client: \n");
-        return ret;
+        strcpy(err, p_errore);
+        perror(strcat(err, " (ricezione messaggio)"));
     }
     return ret;
 }
@@ -69,16 +69,4 @@ void print_addr(struct sockaddr_in *addr)
     memset(tmp, 0, sizeof(tmp));
     inet_ntop(AF_INET, &(addr->sin_addr.s_addr), tmp, 20);
     printf("%s:%d\n", tmp, addr->sin_port);
-}
-
-/* ritorna true se sono uguali e false se sono diversi */
-bool compara_addr(struct sockaddr_in *addr1, struct sockaddr_in *addr2)
-{
-    /* debug */
-    if(addr1 == NULL || addr2 == NULL) {
-        return false;
-    }
-    /* print_addr(addr1);
-    print_addr(addr2); */
-    return addr1->sin_addr.s_addr == addr2->sin_addr.s_addr && addr1->sin_port == addr2->sin_port;
 }

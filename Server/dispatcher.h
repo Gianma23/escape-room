@@ -5,7 +5,6 @@
 #include "../utility.h"
 
 #define N_COMANDI 11
-#define COMANDO_DIM 64
 
 typedef struct comando {
     char *nome;

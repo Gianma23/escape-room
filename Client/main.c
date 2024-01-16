@@ -39,11 +39,11 @@ int main(int argc, char *argv[])
     
     printf(DIVISORE);
     memset(buffer, 0, sizeof(buffer));
-    ricevi_messaggio(cl_sock, buffer, "errore");
+    ricevi_messaggio(cl_sock, buffer, "Errore ricezione comandi");
     printf("%s", buffer);
     printf(DIVISORE);
     memset(buffer, 0, sizeof(buffer));
-    ricevi_messaggio(cl_sock, buffer, "errore");
+    ricevi_messaggio(cl_sock, buffer, "Errore ricenzione scenari");
     printf("%s", buffer);
     printf(DIVISORE);
 

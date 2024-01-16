@@ -86,7 +86,7 @@ void prendi_scenari(char *buf)
 {
     int i;
     strcpy(buf, "Scenari disponibili:\n");
-    char tmp[1024];
+    char tmp[256];
     for(i = 0; i < N_SCENARI; i++) {
         sprintf(tmp, "%d: %s. Presenti %d token.\n", i, scenari[i]->nome, scenari[i]->n_token);
         strcat(buf, tmp);
