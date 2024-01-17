@@ -3,12 +3,15 @@
 #include "gioco.h"
 #include "scenari/cimitero.h"
 
-static int scenario_scelto = -1;
-static enigma *enigma_attivato = NULL;
-static int giocatore_enigma_attivato = -1;
-static int token = 0;
-static gruppo giocatori;
-static bool send_both = false;
+static struct gioco {
+    int scenario_scelto;
+    enigma *enigma_attivato;
+    int giocatore_enigma_attivato;
+    int token;
+    bool send_both;
+} gioco = {-1, NULL, -1, 0, {false, 0, {-1, -1}}, false};
+
+gruppo giocatori;
 
 static scenario *scenari[] = {
     &scenario_cimitero
@@ -50,7 +53,7 @@ char* descrizione_locazione(locazione *loc)
 oggetto* cerca_oggetto(char* obj)
 {
     int i;
-    scenario *scen = scenari[scenario_scelto];
+    scenario *scen = scenari[gioco.scenario_scelto];
     for(i = 0; i < scen->n_oggetti; i++) {
         if(strcmp(obj, scen->oggetti[i].nome) == 0) {
             return &scen->oggetti[i];
@@ -61,11 +64,11 @@ oggetto* cerca_oggetto(char* obj)
 
 char* attiva_enigma(oggetto *obj, int sock)
 {
-    if(enigma_attivato != NULL) {
+    if(gioco.enigma_attivato != NULL) {
         return "L'altro giocatore sta risolvendo l'enigma!\n";
     }
-    enigma_attivato = obj->enigma;
-    giocatore_enigma_attivato = sock;
+    gioco.enigma_attivato = obj->enigma;
+    gioco.giocatore_enigma_attivato = sock;
 
     static char tmp[512] = "Enigma attivato!\n";
     strcat(tmp, obj->enigma->descrizione);
@@ -75,7 +78,7 @@ char* attiva_enigma(oggetto *obj, int sock)
 
 bool is_game_ended()
 {
-    return token == scenari[scenario_scelto]->n_token;
+    return gioco.token == scenari[gioco.scenario_scelto]->n_token;
 }
 
 /* ============= IMPLEMENTAZIONE FUNZIONI HEADER ============= */
@@ -108,7 +111,7 @@ char* inizia_scenario(int sock, int id_scenario)
     if(giocatori.attivo) {
         set_send_both(true);
     }
-    scenario_scelto = id_scenario;
+    gioco.scenario_scelto = id_scenario;
     return "Scenario iniziato, buona fortuna!\n";
 }
 
@@ -131,7 +134,7 @@ char* termina_scenario(int sock)
 char* prendi_descrizione(char *opzione)
 {
     int i;
-    const scenario *scen = scenari[scenario_scelto];
+    const scenario *scen = scenari[gioco.scenario_scelto];
     if(opzione == NULL) {
         return scen->descrizione;
     }
@@ -199,7 +202,7 @@ char* lascia_oggetto(int sock, char *nome_obj)
 char* utilizza_oggetti(int sock, char *nome_obj1, char *nome_obj2)
 {
     int i;
-    scenario *scen = scenari[scenario_scelto];
+    scenario *scen = scenari[gioco.scenario_scelto];
     static char ret[256];
 
     oggetto *obj1 = cerca_oggetto(nome_obj1);
@@ -233,7 +236,7 @@ char* utilizza_oggetti(int sock, char *nome_obj1, char *nome_obj2)
             obj2->is_bloccato = false;
             /* assegno un token e guardo se la partita è finita */
             if(util->has_token) {
-                token++; 
+                gioco.token++; 
             }
             if(is_game_ended()) {
                 if(giocatori.attivo) {
@@ -252,7 +255,7 @@ char* utilizza_oggetti(int sock, char *nome_obj1, char *nome_obj2)
 char* prendi_inventario(int sock)
 {
     int i;
-    scenario *scen = scenari[scenario_scelto];
+    scenario *scen = scenari[gioco.scenario_scelto];
     static char ret[256];
     
     memset(ret, 0, sizeof(ret));
@@ -273,14 +276,14 @@ char* prendi_inventario(int sock)
 char* risolvi_enigma(char *risposta)
 {
     static char tmp[256];
-    if(strcmp(risposta, enigma_attivato->soluzione) != 0) {
+    if(strcmp(risposta, gioco.enigma_attivato->soluzione) != 0) {
         strcpy(tmp, "Soluzione errata.\n");
     }
     /* Soluzione corretta */
     else {
-        enigma_attivato->oggetto_nascosto->is_nascosto = false;
-        enigma_attivato->is_risolto = true;
-        token++;
+        gioco.enigma_attivato->oggetto_nascosto->is_nascosto = false;
+        gioco.enigma_attivato->is_risolto = true;
+        gioco.token++;
         if(is_game_ended()) {
                 if(giocatori.attivo) {
                     set_send_both(true);
@@ -288,29 +291,29 @@ char* risolvi_enigma(char *risposta)
                 reset_scenario();
                 return "Lo scenario è stato completato, congratulazioni!\n";
             }
-        strcpy(tmp, enigma_attivato->messaggio_risoluzione);
+        strcpy(tmp, gioco.enigma_attivato->messaggio_risoluzione);
     }
-    enigma_attivato = NULL;
-    giocatore_enigma_attivato = -1;
+    gioco.enigma_attivato = NULL;
+    gioco.giocatore_enigma_attivato = -1;
     return tmp;
 }
 
 int token_rimasti()
 {
-    return scenari[scenario_scelto]->n_token - token;
+    return scenari[gioco.scenario_scelto]->n_token - gioco.token;
 }
 
 /* Resetta lo scenario id_scenario ai valori di default */
 bool reset_scenario()
 {
-    if(scenario_scelto == -1) {
+    if(gioco.scenario_scelto == -1) {
         return false;
     }
     if(giocatori.attivo) {
         set_send_both(true);
     }
     int i;
-    const scenario *scen = scenari[scenario_scelto];
+    const scenario *scen = scenari[gioco.scenario_scelto];
     for(i = 0; i < scen->n_oggetti; i++) {
         oggetto *obj = &scen->oggetti[i];
         if(i < scen->n_bloccati) {
@@ -331,29 +334,31 @@ bool reset_scenario()
     for(i = 0; i < scen->n_enigmi; i++) {
         scen->enigmi[i].is_risolto = false;
     }
-    scenario_scelto = -1;
+    /* reset variabili gioco */
+    gioco.scenario_scelto = -1;
+    gioco.token = 0;
     return true;
 }
 
 bool is_risposta_enigma(int sock)
 {
-    return enigma_attivato != NULL && sock == giocatore_enigma_attivato;
+    return gioco.enigma_attivato != NULL && sock == gioco.giocatore_enigma_attivato;
 }
 
 /* Ritorna true se è stato scelto uno scenario e dunque è in corso una partita */
 bool is_game_started()
 {
-    return scenario_scelto != -1;
+    return gioco.scenario_scelto != -1;
 }
 
 bool get_send_both()
 {
-    return send_both;
+    return gioco.send_both;
 }
 
 void set_send_both(bool value)
 {
-    send_both = value;
+    gioco.send_both = value;
 }
 
 /* INTERFACCIA GRUPPO */
@@ -392,6 +397,7 @@ char* elimina_gruppo()
         return "Gruppo non esistente, impossibile eliminare.\n";
     }
     giocatori.attivo = false;
+    giocatori.indirizzi[0] = giocatori.indirizzi[1] = -1;
     giocatori.num_giocatori = 0;
     return "Gruppo eliminato con successo.\n";
 }

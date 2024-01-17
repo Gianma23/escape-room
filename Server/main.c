@@ -33,21 +33,7 @@ int main(int argc, char *argv[])
            "                    SERVER STARTED                    \n"
            "======================================================\n"
            "Comandi disponibili:\n"
-           "    start       avvia il server di gioco\n"
-           "    stop        termina il server\n");
-    
-    while(1) {
-        memset(input, 0, sizeof(input));
-        fgets(input, 6, stdin);
-        if(strcmp(input, "start") == 0) {
-            break;
-        }
-        if(strcmp(input, "stop\n\0") == 0) {
-            printf("Arresto del server\n");
-            exit(1);
-        }
-        printf("Comando non disponibile.\n");
-    }
+           "    stop        termina il server\n\n");
 
     printf("Avvio del server in corso...\n");
     list_sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -149,7 +135,7 @@ int main(int argc, char *argv[])
                             FD_CLR(sock_giocatore, &master);
                             printf("Socket %d rimosso dal set dei descrittori.\n"
                                     "Sconnessione client effettuata con successo.\n\n", sock_giocatore);
-                            printf("%s\n", elimina_gruppo());
+                            printf("%s", elimina_gruppo());
                         }
                         reset_scenario();
                         printf("Reset dello scenario effettuato.\n\n");
