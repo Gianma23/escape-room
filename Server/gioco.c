@@ -3,15 +3,28 @@
 #include "gioco.h"
 #include "scenari/cimitero.h"
 
+#define MAX_GIOCATORI_GRUPPO 2
+#define MAX_OGGETTI_INVENTARIO 2
+#define N_SCENARI 1
+
+typedef struct giocatore {
+    int sock;
+    int n_oggetti_presi;
+} giocatore;
+
+/* variabili globali */
+
 static struct gioco {
     int scenario_scelto;
     enigma *enigma_attivato;
     int giocatore_enigma_attivato;
     int token;
     bool send_both;
-} gioco = {-1, NULL, -1, 0, {false, 0, {-1, -1}}, false};
+    bool gruppo_attivo;
+    int num_giocatori;
+} gioco = {-1, NULL, -1, 0, false, false, 0};
 
-gruppo giocatori;
+giocatore giocatori[MAX_GIOCATORI_GRUPPO] = {{-1, 0}, {-1, 0}};
 
 static scenario *scenari[] = {
     &scenario_cimitero
@@ -102,13 +115,13 @@ char* inizia_scenario(int sock, int id_scenario)
     if(id_scenario < 0 || id_scenario >= N_SCENARI) {
         return "Scenario non disponibile.\n";
     }
-    if(giocatori.attivo && giocatori.indirizzi[0] != sock) {
+    if(gioco.gruppo_attivo && giocatori[0].sock != sock) {
         return "Solo l'owner del gruppo può avviare uno scenario.\n";
     }
-    if(giocatori.attivo && giocatori.num_giocatori < MAX_GIOCATORI_GRUPPO) {
+    if(gioco.gruppo_attivo && gioco.num_giocatori < MAX_GIOCATORI_GRUPPO) {
         return "Gruppo avviato, lo scenario può partire solo se il gruppo è pieno.\n";
     }
-    if(giocatori.attivo) {
+    if(gioco.gruppo_attivo) {
         set_send_both(true);
     }
     gioco.scenario_scelto = id_scenario;
@@ -117,10 +130,10 @@ char* inizia_scenario(int sock, int id_scenario)
 
 char* termina_scenario(int sock)
 {
-    if(giocatori.attivo && giocatori.indirizzi[0] != sock) {
+    if(gioco.gruppo_attivo && giocatori[0].sock != sock) {
         return "Solo l'owner del gruppo può terminare uno scenario.\n";
     }
-    if(giocatori.attivo) {
+    if(gioco.gruppo_attivo) {
         set_send_both(true);
     }
     reset_scenario();
@@ -171,9 +184,16 @@ char* prendi_oggetto(int sock, char *nome_obj)
         return "Non puoi prendere questo oggetto!\n";
     }
     if(obj->is_preso) {
+        if(gioco.gruppo_attivo && obj->sock_possessore != sock) {
+            return "L'altro giocatore ha già preso questo oggetto!\n";
+        }
         return "Oggetto già preso!\n";
     }
-
+    giocatore *g = (sock == giocatori[0].sock) ? &giocatori[0] : &giocatori[1];
+    if(g->n_oggetti_presi >= MAX_OGGETTI_INVENTARIO) {
+        return "Inventario pieno!\n";
+    }
+    g->n_oggetti_presi++;
     obj->is_preso = true;
     obj->sock_possessore = sock;
     return "Oggetto raccolto!\n";
@@ -188,6 +208,8 @@ char* lascia_oggetto(int sock, char *nome_obj)
     if(!obj->is_preso) {
         return "Non hai questo oggetto nel tuo inventario.\n";
     }
+    giocatore *g = (sock == giocatori[0].sock) ? &giocatori[0] : &giocatori[1];
+    g->n_oggetti_presi--;
     obj->is_preso = true;
     obj->sock_possessore = sock;
     return "Oggetto lasciato dove lo avevi raccolto.\n";
@@ -239,7 +261,7 @@ char* utilizza_oggetti(int sock, char *nome_obj1, char *nome_obj2)
                 gioco.token++; 
             }
             if(is_game_ended()) {
-                if(giocatori.attivo) {
+                if(gioco.gruppo_attivo) {
                     set_send_both(true);
                 }
                 reset_scenario();
@@ -285,7 +307,7 @@ char* risolvi_enigma(char *risposta)
         gioco.enigma_attivato->is_risolto = true;
         gioco.token++;
         if(is_game_ended()) {
-                if(giocatori.attivo) {
+                if(gioco.gruppo_attivo) {
                     set_send_both(true);
                 }
                 reset_scenario();
@@ -309,7 +331,7 @@ bool reset_scenario()
     if(gioco.scenario_scelto == -1) {
         return false;
     }
-    if(giocatori.attivo) {
+    if(gioco.gruppo_attivo) {
         set_send_both(true);
     }
     int i;
@@ -365,52 +387,57 @@ void set_send_both(bool value)
 
 char* avvia_gruppo(int sock)
 {
-    if(giocatori.attivo) {
+    if(gioco.gruppo_attivo) {
         return "Gruppo per giocare già creato.\n";
     }
 
-    giocatori.attivo = true;
-    giocatori.num_giocatori++;
-    giocatori.indirizzi[0] = sock;
+    gioco.gruppo_attivo = true;
+    gioco.num_giocatori++;
+    giocatori[0].sock = sock;
     return "Gruppo per la stanza creato con successo!\n";
 }
 
 char* entra_gruppo(int sock)
 {
-    if(!giocatori.attivo) {
+    if(!gioco.gruppo_attivo) {
         return "Gruppo non esistente, impossibile entrare.\n";
     }
-    if(giocatori.num_giocatori == MAX_GIOCATORI_GRUPPO) {
+    if(gioco.num_giocatori == MAX_GIOCATORI_GRUPPO) {
         return "Gruppo già pieno!\n";
     }
-    if(sock == giocatori.indirizzi[0]) {
+    if(sock == giocatori[0].sock) {
         return "Sei già nel gruppo!\n";
     }
-    giocatori.indirizzi[giocatori.num_giocatori++] = sock;
+    giocatori[gioco.num_giocatori++].sock = sock;
     set_send_both(true);
     return "Gruppo completo! In attesa che il creatore inizi lo scenario.\n";
 }
 
 char* elimina_gruppo()
 {
-    if(!giocatori.attivo) {
+    if(!gioco.gruppo_attivo) {
         return "Gruppo non esistente, impossibile eliminare.\n";
     }
-    giocatori.attivo = false;
-    giocatori.indirizzi[0] = giocatori.indirizzi[1] = -1;
-    giocatori.num_giocatori = 0;
+    gioco.gruppo_attivo = false;
+    giocatori[0].sock = giocatori[1].sock = -1;
+    gioco.num_giocatori = 0;
     return "Gruppo eliminato con successo.\n";
 }
 
 int prendi_giocatore2()
 {
-    return giocatori.indirizzi[1];
+    return giocatori[1].sock;
 }
 
+/* Ritorna il socket dell'altro giocatore, altrimenti -2
+    se sock non è di un giocatore presente. */
 int prendi_altro_giocatore(int sock)
 {
-    if(giocatori.indirizzi[0] == sock) {
-        return giocatori.indirizzi[1];
+    if(giocatori[0].sock == sock) {
+        return giocatori[1].sock;
     }
-    return giocatori.indirizzi[0];
+    if(giocatori[1].sock == sock) {
+        return giocatori[0].sock;
+    }
+    return -2;
 }

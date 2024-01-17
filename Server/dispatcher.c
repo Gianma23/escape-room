@@ -8,6 +8,8 @@
 #include "gioco.h"
 #include "timer.h"
 
+#define TEMPO_TIMER 2400
+
 /* ===================== HANDLERS ===================== */
 /*  cl_sock: socket del client che ha invocato il comando
     opt: opzioni del comando */
@@ -61,7 +63,7 @@ char* handler_start(int cl_sock, char* opt)
     if(strtok(NULL, " ") != NULL) {
         return "Troppi parametri.\n";
     }
-    start_timer(1200); /* 20 min di tempo per completare lo scenario */
+    start_timer(TEMPO_TIMER); /* 40 min di tempo per completare lo scenario */
     return inizia_scenario(cl_sock, id_scenario);
 }
 

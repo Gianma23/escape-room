@@ -4,10 +4,9 @@
 #include "../utility.h"
 
 #define MAX_OGGETTI_LOCAZIONE 5
-#define MAX_GIOCATORI_GRUPPO 2
-#define N_SCENARI 1
 
 typedef struct oggetto oggetto;
+
 typedef struct enigma {
     char *descrizione;
     char *soluzione;
@@ -15,6 +14,7 @@ typedef struct enigma {
     char *messaggio_risoluzione;
     oggetto *oggetto_nascosto;
 } enigma;
+
 typedef struct oggetto {
     char *nome;
     char *descrizione_bloccato;
@@ -31,12 +31,14 @@ typedef struct oggetto {
        (non ci sarebbe questo problema senza multiplayer) */
     int sock_possessore;
 } oggetto;
+
 typedef struct locazione {
     char *nome;
     char *descrizione_iniziale;
     int n_oggetti;
     oggetto *oggetti[MAX_OGGETTI_LOCAZIONE];
 } locazione;
+
 typedef struct utilizzo {
     char *primo;
     char *secondo;
@@ -44,6 +46,7 @@ typedef struct utilizzo {
     oggetto *oggetto_nascosto;
     bool has_token;
 } utilizzo;
+
 typedef struct scenario {
     char *nome;
     char *descrizione;
@@ -59,11 +62,6 @@ typedef struct scenario {
     int n_bloccati;
     int n_nascosti;
 } scenario;
-typedef struct gruppo {
-    bool attivo;
-    int num_giocatori;
-    int indirizzi[MAX_GIOCATORI_GRUPPO];
-} gruppo;
 
 /* funzioni gioco */
 void prendi_scenari(char *);

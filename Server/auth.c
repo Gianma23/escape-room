@@ -5,9 +5,10 @@
 #include <stdlib.h>
 #include <arpa/inet.h>
 #include "auth.h"
-#include "gioco.h"
 
-static authentication loggati[MAX_GIOCATORI_GRUPPO];
+#define MAX_LOGIN 2
+
+static authentication loggati[MAX_LOGIN];
 static int num_login = 0;
 
 /* ================== IMPLEMENTAZIONE HEADER ================== */
@@ -88,13 +89,12 @@ char* login_user(char* opt, int cl_sock)
         return "Password troppo lunga.\n";
     }
 
-    if(num_login == MAX_GIOCATORI_GRUPPO) {
+    if(num_login == MAX_LOGIN) {
         return "Raggiunto il massimo numero di persone loggate insieme.\n";
     }
     if(num_login == 1 && cl_sock == loggati[0].sock) {
         return "Sei già loggato!\n";
     }
-    printf("username loggato: %s, user: %s\n", loggati[0].username, user);
     if(num_login == 1 && strcmp(loggati[0].username, user) == 0) {
         return "Questo username è già loggato su un altro dispositivo.\n";
     }

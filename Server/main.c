@@ -27,7 +27,6 @@ int main(int argc, char *argv[])
     char buffer[BUFFER_DIM] = "";
     int list_sock, comm_sock;
     int sock_giocatore;
-    char input[6];
 
     printf("======================================================\n"
            "                    SERVER STARTED                    \n"
@@ -127,7 +126,7 @@ int main(int argc, char *argv[])
                                "Sconnessione client effettuata con successo.\n\n", i);
                                
                         /* sconnetto anche l'altro giocatore se presente */
-                        if((sock_giocatore = prendi_altro_giocatore(i)) != -1) {
+                        if((sock_giocatore = prendi_altro_giocatore(i)) >= 0) {
                             printf("Presente gruppo, disconnessione altro giocatore...");
                             printf("%s", logout_user(sock_giocatore));
                             close(sock_giocatore);
