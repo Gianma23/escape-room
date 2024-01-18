@@ -30,7 +30,7 @@ char* handler_startgroup(int cl_sock, char* opt)
         return "Non sei loggato!\n";
     }
     if(is_game_started()) {
-        return "Impossibile creare il gruppo, è già in corso uno scenario.\n";
+        return "Impossibile creare il gruppo, È già stato avviato uno scenario\n";
     }
     if(strtok(opt, " ") != NULL) {
         return "Troppi parametri.\n";
@@ -54,6 +54,7 @@ char* handler_start(int cl_sock, char* opt)
     if(is_game_started()) {
         return "Impossibile iniziare, il gioco è già iniziato!\n";
     }
+    /* TODO aggiungere giocatore */
 
     char* str_scenario = strtok(opt, " ");
     if(str_scenario == NULL) {
@@ -75,6 +76,9 @@ char* handler_look(int cl_sock, char* opt)
     if(!is_game_started()) {
         return "Nessuno scenario iniziato. Fare prima start <stanza>\n";
     }
+    if(is_gruppo_attivo() && is_gruppo_attivo() && prendi_giocatore(cl_sock) == -1) {
+        return "È già stato avviato uno scenario\n";
+    }
 
     char* opzione = strtok(opt, " ");
     if(opzione != NULL && strtok(NULL, " ") != NULL) {
@@ -90,6 +94,9 @@ char* handler_take(int cl_sock, char* opt)
     }
     if(!is_game_started()) {
         return "Nessuno scenario iniziato. Fare prima start <stanza>\n";
+    }
+    if(is_gruppo_attivo() && prendi_giocatore(cl_sock) == -1) {
+        return "È già stato avviato uno scenario\n";
     }
 
     char* oggetto = strtok(opt, " ");
@@ -110,6 +117,9 @@ char* handler_drop(int cl_sock, char* opt)
     if(!is_game_started()) {
         return "Nessuno scenario iniziato. Fare prima start <stanza>\n";
     }
+    if(is_gruppo_attivo() && prendi_giocatore(cl_sock) == -1) {
+        return "È già stato avviato uno scenario\n";
+    }
 
     char* oggetto = strtok(opt, " ");
     if(oggetto == NULL) {
@@ -128,6 +138,9 @@ char* handler_use(int cl_sock, char* opt)
     }
     if(!is_game_started()) {
         return "Nessuno scenario iniziato. Fare prima start <stanza>\n";
+    }
+    if(is_gruppo_attivo() && prendi_giocatore(cl_sock) == -1) {
+        return "È già stato avviato uno scenario\n";
     }
     
     char* obj1 = strtok(opt, " ");
@@ -152,6 +165,10 @@ char* handler_objs(int cl_sock, char* opt)
     if(!is_game_started()) {
         return "Nessuno scenario iniziato. Fare prima start <stanza>\n";
     }
+    if(is_gruppo_attivo() && prendi_giocatore(cl_sock) == -1) {
+        return "È già stato avviato uno scenario\n";
+    }
+
     if(strtok(opt, " ") != NULL) {
         return "Troppi parametri.\n";
     }
@@ -166,6 +183,10 @@ char* handler_end(int cl_sock, char *opt)
     if(!is_game_started()) {
         return "Nessuno scenario iniziato.\n";
     }
+    if(is_gruppo_attivo() && prendi_giocatore(cl_sock) == -1) {
+        return "È già stato avviato uno scenario\n";
+    }
+
     if(strtok(opt, " ") != NULL) {
         return "Troppi parametri.\n";
     }

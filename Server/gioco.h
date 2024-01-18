@@ -81,11 +81,11 @@ bool get_send_both();
 void set_send_both(bool);
 
 /* funzioni gruppo */
+bool is_gruppo_attivo();
 char* avvia_gruppo(int);
 char* entra_gruppo(int);
 char* elimina_gruppo();
-int prendi_giocatore1();
-int prendi_giocatore2();
+int prendi_giocatore(int);
 int prendi_altro_giocatore(int);
 
 #endif

@@ -384,6 +384,10 @@ void set_send_both(bool value)
 }
 
 /* INTERFACCIA GRUPPO */
+bool is_gruppo_attivo()
+{
+    return gioco.gruppo_attivo;
+}
 
 char* avvia_gruppo(int sock)
 {
@@ -424,12 +428,20 @@ char* elimina_gruppo()
     return "Gruppo eliminato con successo.\n";
 }
 
-int prendi_giocatore2()
+/* Ritorna il socket dell'altro giocatore, altrimenti -2
+    se sock non è di un giocatore presente. */
+int prendi_giocatore(int sock)
 {
-    return giocatori[1].sock;
+    if(giocatori[0].sock == sock) {
+        return giocatori[0].sock;
+    }
+    if(giocatori[1].sock == sock) {
+        return giocatori[1].sock;
+    }
+    return -1;
 }
 
-/* Ritorna il socket dell'altro giocatore, altrimenti -2
+/* Ritorna il socket dell'altro giocatore, altrimenti -1
     se sock non è di un giocatore presente. */
 int prendi_altro_giocatore(int sock)
 {
@@ -439,5 +451,5 @@ int prendi_altro_giocatore(int sock)
     if(giocatori[1].sock == sock) {
         return giocatori[0].sock;
     }
-    return -2;
+    return -1;
 }
