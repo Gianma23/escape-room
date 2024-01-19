@@ -94,7 +94,7 @@ bool is_game_ended()
     return gioco.token == scenari[gioco.scenario_scelto]->n_token;
 }
 
-/* ============= IMPLEMENTAZIONE FUNZIONI HEADER ============= */
+/* ==================== IMPLEMENTAZIONE FUNZIONI ==================== */
 
 /*  buf: buffer nel quale scrivere.
     Ritorna gli scenari disponibili */

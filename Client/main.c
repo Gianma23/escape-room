@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
     in_port_t porta = htons(SERVER_PORT);
 
     cl_sock = socket(AF_INET, SOCK_STREAM, 0);
-    if(ret < 0) {
+    if(cl_sock < 0) {
         perror("errore di creazione socket");
         exit(1);
     }

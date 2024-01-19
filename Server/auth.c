@@ -7,11 +7,18 @@
 #include "auth.h"
 
 #define MAX_LOGIN 2
+#define USER_DIM 20
+#define PASSWORD_DIM 20
+
+typedef struct authentication {
+    int sock;
+    char username[USER_DIM];
+} authentication;
 
 static authentication loggati[MAX_LOGIN];
 static int num_login = 0;
 
-/* ================== IMPLEMENTAZIONE HEADER ================== */
+/* ================== IMPLEMENTAZIONE FUNZIONI ================== */
 
 /*  opt: opzioni del comando nel formato <username> <password>
     Registra l'utente con la password nel file users.txt */

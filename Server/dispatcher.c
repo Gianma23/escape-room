@@ -9,6 +9,13 @@
 #include "timer.h"
 
 #define TEMPO_TIMER 2400
+#define N_COMANDI 11
+
+typedef struct comando {
+    char *nome;
+    char* (*handler)();
+    char* descrizione;
+} comando;
 
 /* ===================== HANDLERS ===================== */
 /*  cl_sock: socket del client che ha invocato il comando
@@ -193,7 +200,7 @@ char* handler_end(int cl_sock, char *opt)
     return termina_scenario(cl_sock);
 }
 
-/* COMANDI =============== */
+/* ===================== COMANDI ===================== */
 
 static const comando lista_comandi[] = {
     {"register", handler_register, " <username> <password>\tregistra un nuovo account"},
@@ -210,7 +217,7 @@ static const comando lista_comandi[] = {
     {"end", handler_end, "\t\t\t\ttermina la partita. Se è avviato un gruppo termina per tutti"}
 };
 
-/* IMPLEMENTAZIONE FUNZIONI INTERFACCIA ============ */
+/* =====================IMPLEMENTAZIONE FUNZIONI ===================== */
 
 /*  socket: client al quale mandare la risposta
     buffer: stringa contente il comando
