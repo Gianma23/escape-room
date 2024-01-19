@@ -210,8 +210,8 @@ char* lascia_oggetto(int sock, char *nome_obj)
     }
     giocatore *g = (sock == giocatori[0].sock) ? &giocatori[0] : &giocatori[1];
     g->n_oggetti_presi--;
-    obj->is_preso = true;
-    obj->sock_possessore = sock;
+    obj->is_preso = false;
+    obj->sock_possessore = -1;
     return "Oggetto lasciato dove lo avevi raccolto.\n";
 }
 

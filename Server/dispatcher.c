@@ -231,8 +231,7 @@ void command_dispatcher(int socket, char *buffer, char *soggetto)
     memset(invio, 0, sizeof(invio));
 
     if(is_risposta_enigma(socket)) {
-        com = strtok(buffer, "\n");
-        strcpy(risposta, risolvi_enigma(com));
+        strcpy(risposta, risolvi_enigma(buffer));
         /* header messaggio enigma */
         time = remaining_time();
         sprintf(invio, "- Rimanenti %d minuti e %d secondi.\n"

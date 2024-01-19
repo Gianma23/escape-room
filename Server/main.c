@@ -18,15 +18,19 @@
 
 int main(int argc, char *argv[])
 {
-    struct sockaddr_in sv_addr, cl_addr;
-    fd_set master, read_fds;
-    int fdmax;
-    int ret, i;
+    int fdmax,
+        ret,
+        i,
+        list_sock,
+        comm_sock,
+        sock_giocatore;
+    fd_set  master,
+            read_fds;
     socklen_t addrlen;
+    struct sockaddr_in  sv_addr,
+                        cl_addr;
+    char buffer[BUFFER_DIM];
     in_port_t porta = htons(atoi(argv[1]));
-    char buffer[BUFFER_DIM] = "";
-    int list_sock, comm_sock;
-    int sock_giocatore;
 
     printf("======================================================\n"
            "                    SERVER STARTED                    \n"

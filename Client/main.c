@@ -17,14 +17,20 @@
 
 int main(int argc, char *argv[])
 {
-    int ret, i;
-    int cl_sock;
-    fd_set master, read_fds;
+    int ret,
+        i,
+        cl_sock;
+    fd_set  master,
+            read_fds;
+    char buffer[BUFFER_DIM];
     struct sockaddr_in sv_addr;
     in_port_t porta = htons(SERVER_PORT);
-    char buffer[BUFFER_DIM];
 
     cl_sock = socket(AF_INET, SOCK_STREAM, 0);
+    if(ret < 0) {
+        perror("errore di creazione socket");
+        exit(1);
+    }
 
     memset(&sv_addr, 0, sizeof(sv_addr));
     sv_addr.sin_family = AF_INET;
@@ -79,6 +85,7 @@ int main(int argc, char *argv[])
                     printf("%s", buffer);
                     printf(DIVISORE);
                 }
+                /* socket di comunicazione con il server */
                 else if(i == cl_sock) {
                     memset(buffer, 0, sizeof(buffer));
                     ret = ricevi_messaggio(cl_sock, buffer, "Errore in fase di ricezione");
@@ -92,5 +99,5 @@ int main(int argc, char *argv[])
                 }
             }
         } /* fine for */
-    } 
+    } /* fine for (;;) */
 }
