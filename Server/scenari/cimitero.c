@@ -143,7 +143,7 @@ locazione locazioni_cimitero[] = {
      2, {&oggetti_cimitero[3], &oggetti_cimitero[6]}},
     {"tomba",
      "La tomba è malcurata e cade a pezzi. ",
-     2, {&oggetti_cimitero[4], &oggetti_cimitero[7]}},
+     2, {&oggetti_cimitero[5], &oggetti_cimitero[7]}},
 };
 
 scenario scenario_cimitero = {
