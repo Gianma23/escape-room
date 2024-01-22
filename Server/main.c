@@ -86,8 +86,12 @@ int main(int argc, char *argv[])
                 /* stdin */
                 if(i == STDIN_FILENO) {
                     scanf("%s", buffer);
-                    if (strcmp(buffer, "stop") != 0) {
+                    if(strcmp(buffer, "stop") != 0) {
                         printf("Comando server non riconosciuto.\n");
+                        continue;
+                    }
+                    if(is_game_started()) {
+                        printf("Impossibile terminare il server, il gioco è in corso.\n");
                         continue;
                     }
                     printf("Chiusura server...\n");
