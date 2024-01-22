@@ -83,8 +83,10 @@ char* attiva_enigma(oggetto *obj, int sock)
     gioco.enigma_attivato = obj->enigma;
     gioco.giocatore_enigma_attivato = sock;
 
-    static char tmp[512] = "Enigma attivato!\n";
-    strcat(tmp, obj->enigma->descrizione);
+    static char tmp[512];
+    memset(tmp, 0, sizeof(tmp));
+    strcpy(tmp, "Enigma attivato!\n");
+    strcat(tmp, gioco.enigma_attivato->descrizione);
     strcat(tmp, obj->is_bloccato ? obj->descrizione_bloccato : obj->descrizione_sbloccato);
     return tmp;
 }
@@ -225,7 +227,6 @@ char* utilizza_oggetti(int sock, char *nome_obj1, char *nome_obj2)
 {
     int i;
     scenario *scen = scenari[gioco.scenario_scelto];
-    static char ret[256];
 
     oggetto *obj1 = cerca_oggetto(nome_obj1);
     if(obj1 == NULL) {
@@ -253,6 +254,8 @@ char* utilizza_oggetti(int sock, char *nome_obj1, char *nome_obj2)
             /* blocco oggetto1 */
             obj1->is_nascosto = true;
             obj1->is_preso = false;
+            giocatore *g = (sock == giocatori[0].sock) ? &giocatori[0] : &giocatori[1];
+            g->n_oggetti_presi--;
             obj1->sock_possessore = -1;
             /* sblocco oggetto2 */
             obj2->is_bloccato = false;
@@ -267,8 +270,7 @@ char* utilizza_oggetti(int sock, char *nome_obj1, char *nome_obj2)
                 reset_scenario();
                 return "Lo scenario è stato completato, congratulazioni!\n";
             }
-            strcat(ret, util->messaggio);
-            return ret;
+            return util->messaggio;
         }
     }
     return "Utilizzo non previsto.\n";
@@ -307,12 +309,12 @@ char* risolvi_enigma(char *risposta)
         gioco.enigma_attivato->is_risolto = true;
         gioco.token++;
         if(is_game_ended()) {
-                if(gioco.gruppo_attivo) {
-                    set_send_both(true);
-                }
-                reset_scenario();
-                return "Lo scenario è stato completato, congratulazioni!\n";
+            if(gioco.gruppo_attivo) {
+                set_send_both(true);
             }
+            reset_scenario();
+            return "Lo scenario è stato completato, congratulazioni!\n";
+        }
         strcpy(tmp, gioco.enigma_attivato->messaggio_risoluzione);
     }
     gioco.enigma_attivato = NULL;
@@ -357,6 +359,8 @@ bool reset_scenario()
         scen->enigmi[i].is_risolto = false;
     }
     /* reset variabili gioco */
+    gioco.giocatore_enigma_attivato = -1;
+    gioco.enigma_attivato = NULL;
     gioco.scenario_scelto = -1;
     gioco.token = 0;
     return true;

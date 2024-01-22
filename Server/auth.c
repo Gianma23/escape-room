@@ -56,7 +56,7 @@ char* register_user(char *opt)
         }
     }
     /* inserisco il nuovo user */
-    fprintf(filePtr, "%s %s", user, password);
+    fprintf(filePtr, "%s %s\n", user, password);
     fclose(filePtr);
     return "Registrazione avvenuta con successo!\n";
 }

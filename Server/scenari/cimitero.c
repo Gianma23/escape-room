@@ -62,7 +62,7 @@ oggetto oggetti_cimitero[] = {
      "Ricordati i giorni nei quali fui usata,\n"
      "insanguinata e battuta...maltrattata.\n"
      "La morte mi circondava, e poco importava,\n"
-     "poiché qualunque fosse il dolore che infliggevo, non marcirei mai.\n",
+     "poiché qualunque fosse il dolore che infliggevo, non marcivo mai.\n",
      "Sopra c'è una **scritta_rovinata**.\n",
      true, false, false, &enigmi_cimitero[1]
     },
@@ -113,11 +113,11 @@ utilizzo utilizzi_cimitero[] = {
     },
     {"spada", "statua", 
      "Posi la spada sulle mani della statua. Si apre un vano ai suoi piedi.\n",
-     &oggetti_cimitero[9], true
+     &oggetti_cimitero[8], true
     },
     {"gemma", "scatola",
      "La gemma si incastra perfettamente nel buco nella scatola, sembra che si sia aperta.\n",
-     &oggetti_cimitero[6], true
+     &oggetti_cimitero[9], true
     },
     {"chiave", "lucchetto",
      "Il lucchetto si è aperto!\n",
